@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ActiveDirectoryAspNetProvider", "ActiveDirectoryAspNetProvider\ActiveDirectoryAspNetProvider.csproj", "{B0DFEF24-C764-4421-A4EA-1217B88B34D6}"
+EndProject
+Global
+	GlobalSection(TeamFoundationVersionControl) = preSolution
+		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
+		SccLocalPath0 = .
+		SccLocalPath1 = ActiveDirectoryAspNetProvider
+		SccNumberOfProjects = 2
+		SccProjectName1 = ActiveDirectoryAspNetProvider
+		SccProjectUniqueName1 = ActiveDirectoryAspNetProvider\\ActiveDirectoryAspNetProvider.csproj
+		SccTeamFoundationServer = https://tfs.codeplex.com/tfs/tfs22
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B0DFEF24-C764-4421-A4EA-1217B88B34D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0DFEF24-C764-4421-A4EA-1217B88B34D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0DFEF24-C764-4421-A4EA-1217B88B34D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0DFEF24-C764-4421-A4EA-1217B88B34D6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
