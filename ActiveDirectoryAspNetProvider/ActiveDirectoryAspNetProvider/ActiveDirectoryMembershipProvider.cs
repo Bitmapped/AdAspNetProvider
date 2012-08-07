@@ -8,7 +8,7 @@ using System.Configuration.Provider;
 
 namespace ActiveDirectoryAspNetProvider
 {
-    class ActiveDirectoryMembershipProvider : System.Web.Security.ActiveDirectoryMembershipProvider
+    public class ActiveDirectoryMembershipProvider : System.Web.Security.ActiveDirectoryMembershipProvider
     {
         // Define private variables.
         private ActiveDirectoryLibrary adLibrary;

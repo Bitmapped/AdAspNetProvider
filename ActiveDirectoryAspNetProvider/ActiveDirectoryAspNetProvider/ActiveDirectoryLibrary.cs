@@ -14,7 +14,7 @@ using System.Web.Security;
 
 namespace ActiveDirectoryAspNetProvider
 {
-    public class ActiveDirectoryLibrary
+    internal class ActiveDirectoryLibrary
     {
         #region Private variables for storing configuration settings.
         internal string connectionUsername, connectionPassword;
