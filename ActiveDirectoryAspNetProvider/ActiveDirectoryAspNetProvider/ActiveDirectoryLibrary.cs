@@ -1,32 +1,34 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Configuration;
+using System.Configuration.Provider;
+using System.DirectoryServices;
+using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web.Hosting;
-using System.DirectoryServices;
-using System.DirectoryServices.AccountManagement;
-using System.Configuration.Provider;
-using System.Web.Security;
 using System.Web;
+using System.Web.Hosting;
+using System.Web.Security;
 
 namespace ActiveDirectoryAspNetProvider
 {
     public class ActiveDirectoryLibrary
     {
         #region Private variables for storing configuration settings.
-        private string connectionUsername, connectionPassword;
-        private string connectionString, connectionDomain;
-        private string[] usersToIgnore, groupsToIgnore, allowedUsers, allowedRoles;
-        private Dictionary<string, string> rolesToRename;
-        private bool cacheRolesInCookie;
+        internal string connectionUsername, connectionPassword;
+        internal string connectionString, connectionDomain;
+        internal string[] usersToIgnore, rolesToIgnore, allowedUsers, allowedRoles;
+        internal Dictionary<string, string> rolesToRename;
+        internal bool cacheRolesInCookie, ignoreDefaultRoles, ignoreDefaultUsers;
         #endregion
 
         #region Default settings
         /// <summary>
         /// Default users to ignore in output.
         /// </summary>
-        private  string[] defaultUsersToIgnore = new string[]
+        private string[] defaultUsersToIgnore = new string[]
             {
                 "Administrator", "TsInternetUser", "Guest", "krbtgt", "Replicate", "SERVICE", "SMSService"
             };
@@ -34,7 +36,7 @@ namespace ActiveDirectoryAspNetProvider
         /// <summary>
         /// Default groups to ignore in output.
         /// </summary>
-        private string[] defaultGroupsToIgnore = new string[]
+        private string[] defaultRolesToIgnore = new string[]
             {
                 "Domain Guests", "Domain Computers", "Group Policy Creator Owners", "Guests", "Users",
                 "Domain Users", "Pre-Windows 2000 Compatible Access", "Exchange Domain Servers", "Schema Admins",
@@ -52,49 +54,89 @@ namespace ActiveDirectoryAspNetProvider
         /// <summary>
         /// Initialize library.
         /// </summary>
-        /// <param name="connectionString">Connection string.</param>
-        /// <param name="connectionDomain">Domain for connection.</param>
-        /// <param name="connectionUsername">Username for connection (optional).</param>
-        /// <param name="connectionPassword">Password for connection (optional).</param>
-        /// <param name="usersToIgnore">Comma-separated list of users to ignore in results.</param>
-        /// <param name="rolesToIgnore">Comma-separated list of groups to ignore in results.</param>
-        /// <param name="rolesToRenameFrom">Comma-separated list of groups to rename.</param>
-        /// <param name="rolesToRenameTo">Comma-separated list of new group names after renaming.</param>
-        /// <param name="allowedUsers">Comma-separated list of allowed users to return.</param>
-        /// <param name="allowedRoles">Comma-separated list of allowed roles to return.</param>
-        /// <param name="cacheRolesInCookie">True/false if roles should be cached in authentication cookie.</param>
-        public ActiveDirectoryLibrary(string connectionString, string connectionDomain, string connectionUsername = "", string connectionPassword = "", string usersToIgnore = "", string rolesToIgnore = "", string rolesToRenameFrom = "", string rolesToRenameTo = "", string allowedUsers = "", string allowedRoles = "", bool cacheRolesInCookie = false )
+        /// <param name="config">Configuration settings.</param>
+        public ActiveDirectoryLibrary(NameValueCollection config)
         {
-            // Store connection domain.
-            this.connectionString = connectionString;
-            this.connectionDomain = connectionDomain;
+            // Check to ensure configuration is specified.
+            if (config == null)
+            {
+                throw new ArgumentNullException("No configuration specified.");
+            }
 
-            // Store username and password if specified.
-            this.connectionUsername = (String.IsNullOrWhiteSpace(connectionUsername)) ? null : connectionUsername;
-            this.connectionPassword = (String.IsNullOrWhiteSpace(connectionPassword)) ? null : connectionPassword;
+            // Process connection string.
+            // Get connection string.
+            if (string.IsNullOrWhiteSpace(config["connectionStringName"]))
+            {
+                throw new ProviderException("Attribute 'connectionStringName' missing or empty.");
+            }
+            if (ConfigurationManager.ConnectionStrings[config["connectionStringName"]] == null)
+            {
+                throw new ProviderException(String.Format("Specified \"{0}\" connection string does not exist.", config["connectionStringName"]));
+            }
+            if (ConfigurationManager.ConnectionStrings[config["connectionStringName"]].ConnectionString.Substring(0, 7) != "LDAP://")
+            {
+                throw new ProviderException(String.Format("Specified \"{0}\" connection string is invalid.", config["connectionStringName"]));
+            }
+            this.connectionString = ConfigurationManager.ConnectionStrings[config["connectionStringName"]].ConnectionString;
 
-            // Merge any provided users and groups to ignore with default values.
-            this.usersToIgnore = usersToIgnore.Split(',')
-                .Select(user => user.Trim())
-                .Union(this.defaultUsersToIgnore)
-                .ToArray<string>();
-            this.groupsToIgnore = rolesToIgnore.Split(',')
-                .Select(group => group.Trim())
-                .Union(this.defaultGroupsToIgnore)
-                .ToArray<string>();
+            // Get connection username, password, domain.  Default to null if they don't exist.
+            this.connectionUsername = string.IsNullOrWhiteSpace(config["connectionUsername"]) ? null : config["connectionUsername"];
+            this.connectionPassword = string.IsNullOrWhiteSpace(config["connectionPassword"]) ? null : config["connectionPassword"];
+            this.connectionDomain = string.IsNullOrWhiteSpace(config["connectionDomain"]) ? null : config["connectionDomain"];
+
+            // Process username to remove any domain prefix.
+            if (this.connectionUsername.IndexOf('\\') != -1)
+            {
+                this.connectionUsername = this.connectionUsername.Substring(this.connectionUsername.IndexOf('\\') + 1);
+            }
+
+            // Process users to ignore.
+            this.usersToIgnore = (String.IsNullOrWhiteSpace(config["usersToIgnore"])) ? new string[] { } : config["usersToIgnore"].Split(',').Select(role => role.Trim()).ToArray<string>();
+
+            // Process default users to ignore.
+            if (!string.IsNullOrWhiteSpace(config["ignoreDefaultUsers"]) && (config["ignoreDefaultUsers"].ToLower() == "false"))
+            {
+                this.ignoreDefaultUsers = false;
+            }
+            else
+            {
+                this.ignoreDefaultUsers = true;
+                this.usersToIgnore = this.usersToIgnore.Union(this.defaultUsersToIgnore).ToArray<string>();
+            }
+
+            // Process roles to ignore.
+            this.rolesToIgnore = (String.IsNullOrWhiteSpace(config["rolesToIgnore"])) ? new string[] { } : config["rolesToIgnore"].Split(',').Select(role => role.Trim()).ToArray<string>();
+
+            // Process default roles to ignore.
+            if (!string.IsNullOrWhiteSpace(config["ignoreDefaultRoles"]) && (config["ignoreDefaultRoles"].ToLower() == "false"))
+            {
+                this.ignoreDefaultRoles = false;
+
+            }
+            else
+            {
+                this.ignoreDefaultRoles = true;
+                this.rolesToIgnore = this.rolesToIgnore.Union(this.defaultRolesToIgnore).ToArray<string>();
+            }
+
+            // Process roles caching.
+            if (!string.IsNullOrWhiteSpace(config["cacheRolesInCookie"]) && (config["cacheRolesInCookie"].ToLower() == "true"))
+            {
+                this.cacheRolesInCookie = true;
+            }
+            else
+            {
+                this.cacheRolesInCookie = false;
+            }
 
             // Prepare allowed users and roles.
-            this.allowedRoles = (String.IsNullOrWhiteSpace(allowedRoles)) ? null : allowedRoles.Split(',').Select(role => role.Trim()).ToArray<string>();
-            this.allowedUsers = (String.IsNullOrWhiteSpace(allowedUsers)) ? null : allowedUsers.Split(',').Select(user => user.Trim()).ToArray<string>();
+            this.allowedRoles = (String.IsNullOrWhiteSpace(config["allowedRoles"])) ? new string[] { } : config["allowedRoles"].Split(',').Select(role => role.Trim()).ToArray<string>();
+            this.allowedUsers = (String.IsNullOrWhiteSpace(config["allowedUsers"])) ? new string[] { } : config["allowedUsers"].Split(',').Select(user => user.Trim()).ToArray<string>();
 
             // Prepare groups to rename.
-            var rolesToRenameFromList = rolesToRenameFrom.Split(',')
-                .Select(role => role.Trim())
-                .ToArray<string>();
-            var rolesToRenameToList = rolesToRenameTo.Split(',')
-                .Select(role => role.Trim())
-                .ToArray<string>();
-            
+            var rolesToRenameFromList = (String.IsNullOrWhiteSpace(config["rolesToRenameFrom"])) ? new string[] { } : config["rolesToRenameFrom"].Split(',').Select(role => role.Trim()).ToArray<string>();
+            var rolesToRenameToList = (String.IsNullOrWhiteSpace(config["rolesToRenameTo"])) ? new string[] { } : config["rolesToRenameTo"].Split(',').Select(role => role.Trim()).ToArray<string>();
+
             // If renameFromList and renameToList have different numbers of elements, throw exception.
             if (rolesToRenameFromList.Count() != rolesToRenameToList.Count())
             {
@@ -119,8 +161,6 @@ namespace ActiveDirectoryAspNetProvider
                 }
             }
 
-            // Process role caching.
-            this.cacheRolesInCookie = cacheRolesInCookie;
         }
 
         /// <summary>
@@ -245,7 +285,7 @@ namespace ActiveDirectoryAspNetProvider
 
             }
 
-             return matchingUsers.Except(this.usersToIgnore).ToArray<string>();
+            return matchingUsers.Except(this.usersToIgnore).ToArray<string>();
 
         }
 
@@ -272,7 +312,7 @@ namespace ActiveDirectoryAspNetProvider
             }
 
             // Filter groups to ignore. Return results.
-            return results.Except(this.groupsToIgnore).ToArray<string>();
+            return results.Except(this.rolesToIgnore).ToArray<string>();
         }
 
         /// <summary>
@@ -363,13 +403,13 @@ namespace ActiveDirectoryAspNetProvider
             {
                 results = results.Intersect(this.allowedRoles).ToList<string>();
             }
-            results = results.Except(this.groupsToIgnore).ToList<string>();
+            results = results.Except(this.rolesToIgnore).ToList<string>();
 
             // Cache data in ticket if needed.
             if ((this.cacheRolesInCookie) && (HttpContext.Current.User.Identity != null))
             {
                 identity = HttpContext.Current.User.Identity as FormsIdentity;
-                
+
                 // See if current user is same as we're checking for.
                 if ((identity != null) && (identity.Name == username))
                 {
@@ -391,12 +431,12 @@ namespace ActiveDirectoryAspNetProvider
                     string encryptedTicket = FormsAuthentication.Encrypt(newTicket);
                     var formsCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket);
                     HttpContext.Current.Response.Cookies.Add(formsCookie);
-                }                   
+                }
 
             }
 
             // Filter groups to ignore. Return results.
-            return results.Except(this.groupsToIgnore).ToArray<string>();
+            return results.Except(this.rolesToIgnore).ToArray<string>();
         }
 
         /// <summary>
