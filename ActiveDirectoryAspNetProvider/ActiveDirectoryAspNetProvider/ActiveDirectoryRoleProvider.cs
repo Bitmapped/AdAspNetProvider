@@ -10,7 +10,7 @@ using System.Configuration.Provider;
 
 namespace ActiveDirectoryAspNetProvider
 {
-    public sealed class ActiveDirectoryRoleProvider : RoleProvider
+    public class ActiveDirectoryRoleProvider : RoleProvider
     {
         // Define private variables.
         private string applicationName;
