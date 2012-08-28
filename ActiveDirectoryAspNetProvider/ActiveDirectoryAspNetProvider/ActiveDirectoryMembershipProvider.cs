@@ -50,9 +50,7 @@ namespace ActiveDirectoryAspNetProvider
             config.Remove("ignoreDefaultUsers");
 
             // Initialize base class.
-            base.Initialize(name, config);
-
-            
+            base.Initialize(name, config);            
         }
 
         /// <summary>
@@ -73,13 +71,13 @@ namespace ActiveDirectoryAspNetProvider
             }
 
             // If allowedRoles is restricted, check further.
-            if (this.adLibrary.allowedRoles.Count() > 0)
+            if (this.adLibrary.allowedRoles.Any())
             {
                 // Check if user has any roles returned.  If so, they can proceed.
                 var roles = this.adLibrary.GetRolesForUser(username);
 
                 // If there is at least one role returned, return true.  Otherwise, return false so user cannot login.
-                if (roles.Count() >= 1)
+                if (roles.Any())
                 {
                     return true;
                 }
