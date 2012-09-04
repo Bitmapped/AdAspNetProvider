@@ -52,6 +52,7 @@
     <Compile Include="ActiveDirectoryLibrary.cs" />
     <Compile Include="ActiveDirectoryMembershipProvider.cs" />
     <Compile Include="ActiveDirectoryRoleProvider.cs" />
+    <Compile Include="ActiveDirectorySessionCache.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

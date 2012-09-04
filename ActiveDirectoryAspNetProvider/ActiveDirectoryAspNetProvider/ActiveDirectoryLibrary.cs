@@ -19,9 +19,10 @@ namespace ActiveDirectoryAspNetProvider
         #region Private variables for storing configuration settings.
         internal string connectionUsername, connectionPassword;
         internal string connectionString, connectionDomain;
+        internal string name;
         internal string[] usersToIgnore, rolesToIgnore, allowedUsers, allowedRoles;
         internal Dictionary<string, string> rolesToRename;
-        internal bool cacheRolesInCookie, ignoreDefaultRoles, ignoreDefaultUsers;
+        internal bool cacheRoles, cacheUsers, ignoreDefaultRoles, ignoreDefaultUsers;
         #endregion
 
         #region Default settings
@@ -54,8 +55,9 @@ namespace ActiveDirectoryAspNetProvider
         /// <summary>
         /// Initialize library.
         /// </summary>
+        /// <param name="name">Provider name.</param>
         /// <param name="config">Configuration settings.</param>
-        public ActiveDirectoryLibrary(NameValueCollection config)
+        public ActiveDirectoryLibrary(string name, NameValueCollection config)
         {
             // Check to ensure configuration is specified.
             if (config == null)
@@ -83,6 +85,9 @@ namespace ActiveDirectoryAspNetProvider
             this.connectionUsername = string.IsNullOrWhiteSpace(config["connectionUsername"]) ? null : config["connectionUsername"];
             this.connectionPassword = string.IsNullOrWhiteSpace(config["connectionPassword"]) ? null : config["connectionPassword"];
             this.connectionDomain = string.IsNullOrWhiteSpace(config["connectionDomain"]) ? null : config["connectionDomain"];
+
+            // Store connection name.
+            this.name = name;
 
             // Process username to remove any domain prefix.
             if (this.connectionUsername.IndexOf('\\') != -1)
@@ -120,13 +125,23 @@ namespace ActiveDirectoryAspNetProvider
             }
 
             // Process roles caching.
-            if (!string.IsNullOrWhiteSpace(config["cacheRolesInCookie"]) && (config["cacheRolesInCookie"].ToLower() == "true"))
+            if (!string.IsNullOrWhiteSpace(config["cacheRoles"]) && (config["cacheRoles"].ToLower() == "true"))
             {
-                this.cacheRolesInCookie = true;
+                this.cacheRoles = true;
             }
             else
             {
-                this.cacheRolesInCookie = false;
+                this.cacheRoles = false;
+            }
+
+            // Process user caching.
+            if (!string.IsNullOrWhiteSpace(config["cacheUsers"]) && (config["cacheUsers"].ToLower() == "true"))
+            {
+                this.cacheUsers = true;
+            }
+            else
+            {
+                this.cacheUsers = false;
             }
 
             // Prepare allowed users and roles.
@@ -324,45 +339,58 @@ namespace ActiveDirectoryAspNetProvider
         {
             // Private variables.
             List<string> results = new List<string>();
+            bool errorOccurred = false;
+
+            // Determine session variable name.
+            var sessName = this.name + "_Roles";
 
             // See if user value has been cached.
-            FormsIdentity identity;
-            if ((this.cacheRolesInCookie) && (HttpContext.Current.User.Identity != null))
+            ActiveDirectorySessionCache sessionCache;
+            if ((this.cacheRoles) && (HttpContext.Current.User.Identity.IsAuthenticated))
             {
-                identity = HttpContext.Current.User.Identity as FormsIdentity;
-
-                // See if current user is same as we're checking for.
-                if ((identity != null) && (identity.Name == username))
+                // Attempt to load 
+                if (HttpContext.Current.Session[sessName] != null)
                 {
-                    if (!String.IsNullOrWhiteSpace(identity.Ticket.UserData))
+                    // Get string.  Split into array and return.
+                    try
                     {
-                        // Data has been cached.  Return data.
-                        return identity.Ticket.UserData.Split(',').ToArray<string>();
+                        sessionCache = HttpContext.Current.Session[sessName] as ActiveDirectorySessionCache;
+                        if ((sessionCache != null) && (sessionCache.Username == HttpContext.Current.User.Identity.Name) && (sessionCache.Roles != null))
+                        {
+                            return sessionCache.Roles.ToArray();
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // In case of error, return no roles.
+                        return new string[] { };
                     }
                 }
             }
 
-            // Create database context.  Method varies depending on if username and password are used.
-            PrincipalContext context;
-
-            if (!String.IsNullOrWhiteSpace(this.connectionUsername) && !String.IsNullOrWhiteSpace(this.connectionPassword))
-            {
-                // Username and password are specified.
-                context = new PrincipalContext(ContextType.Domain, this.connectionDomain, this.connectionUsername, this.connectionPassword);
-            }
-            else
-            {
-                context = new PrincipalContext(ContextType.Domain, null, this.connectionDomain);
-            }
-
-            // Try to load information for the specified user.
+            // Create database context.
+            PrincipalContext context = null;
             try
             {
+                // Create database context.  Method varies depending on if username and password are used.
+                if (!String.IsNullOrWhiteSpace(this.connectionUsername) && !String.IsNullOrWhiteSpace(this.connectionPassword))
+                {
+                    // Username and password are specified.
+                    context = new PrincipalContext(ContextType.Domain, this.connectionDomain, this.connectionUsername, this.connectionPassword);
+                }
+                else
+                {
+                    // Attempt to connect without username.
+                    context = new PrincipalContext(ContextType.Domain, this.connectionDomain);
+                }
+
+                // Try to load information for the specified user. 
                 using (UserPrincipal user = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, username))
                 {
                     using (var groups = user.GetAuthorizationGroups())
                     {
                         // Use group enumerator to loop because of issues with errors on sometimes-returned invalid SIDs.
+                        // See: http://social.msdn.microsoft.com/Forums/en/csharpgeneral/thread/9dd81553-3539-4281-addd-3eb75e6e4d5d 
                         using (var groupEnum = groups.GetEnumerator())
                         {
                             while (groupEnum.MoveNext())
@@ -372,6 +400,7 @@ namespace ActiveDirectoryAspNetProvider
                                 {
                                     currentPrincipal = groupEnum.Current;
 
+                                    // Add role to results.
                                     results.Add(RenameRole(currentPrincipal.SamAccountName));
                                 }
                                 catch (PrincipalOperationException)
@@ -392,11 +421,17 @@ namespace ActiveDirectoryAspNetProvider
             }
             catch (Exception ex)
             {
-                throw new ProviderException("Could not query Active Directory.", ex);
+                // Do not throw exception.
+                //throw new ProviderException("Could not query Active Directory.", ex);
+                errorOccurred = true;
             }
-
-            // Dispose of context.
-            context.Dispose();
+            finally
+            {
+                if (context != null)
+                {
+                    context.Dispose();
+                }
+            }
 
             // Filter allowed roles.
             if (this.allowedRoles != null)
@@ -405,38 +440,23 @@ namespace ActiveDirectoryAspNetProvider
             }
             results = results.Except(this.rolesToIgnore).ToList<string>();
 
-            // Cache data in ticket if needed.
-            if ((this.cacheRolesInCookie) && (HttpContext.Current.User.Identity != null))
+            // Cache roles if currently logged in user is one we are searching for.
+            if ((this.cacheRoles) && (HttpContext.Current.User.Identity.IsAuthenticated) && (HttpContext.Current.User.Identity.Name == username) && (!errorOccurred))
             {
-                identity = HttpContext.Current.User.Identity as FormsIdentity;
-
-                // See if current user is same as we're checking for.
-                if ((identity != null) && (identity.Name == username))
+                // Initialize session cache if needed.
+                if (HttpContext.Current.Session[sessName] == null)
                 {
-                    // They are the same.  Get ticket.
-                    var oldTicket = identity.Ticket;
-
-                    // Calculate roles data to include.
-                    string ticketRoles = String.Join(",", results);
-
-                    // Create new ticket.
-                    var newTicket = new FormsAuthenticationTicket(
-                        oldTicket.Version, // version
-                        oldTicket.Name, // name
-                        oldTicket.IssueDate, // issue date
-                        oldTicket.Expiration, // expiration
-                        oldTicket.IsPersistent, // persistent
-                        ticketRoles             // roles data
-                        );
-                    string encryptedTicket = FormsAuthentication.Encrypt(newTicket);
-                    var formsCookie = new HttpCookie(FormsAuthentication.FormsCookieName, encryptedTicket);
-                    HttpContext.Current.Response.Cookies.Add(formsCookie);
+                    HttpContext.Current.Session[sessName] = new ActiveDirectorySessionCache();
                 }
 
+                // Store information in cache.
+                sessionCache = HttpContext.Current.Session[sessName] as ActiveDirectorySessionCache;
+                sessionCache.Username = username;
+                sessionCache.Roles = results;
             }
 
             // Filter groups to ignore. Return results.
-            return results.Except(this.rolesToIgnore).ToArray<string>();
+            return results.ToArray();
         }
 
         /// <summary>
@@ -555,7 +575,6 @@ namespace ActiveDirectoryAspNetProvider
 
             // Get list of all roles.
             var allRoles = GetAllRoles();
-
 
             // CHeck if role list contains specified role.
             return allRoles.Contains(roleName);

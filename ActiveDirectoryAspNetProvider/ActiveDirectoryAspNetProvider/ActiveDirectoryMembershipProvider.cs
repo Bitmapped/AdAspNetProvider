@@ -5,6 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Configuration;
 using System.Configuration.Provider;
+using System.Web;
+using System.Web.Hosting;
+using System.Web.Security;
 
 namespace ActiveDirectoryAspNetProvider
 {
@@ -12,6 +15,8 @@ namespace ActiveDirectoryAspNetProvider
     {
         // Define private variables.
         private ActiveDirectoryLibrary adLibrary;
+        private bool cacheUsers;
+        private string name;
 
         public override void Initialize(string name, NameValueCollection config)
         {
@@ -26,16 +31,27 @@ namespace ActiveDirectoryAspNetProvider
             {
                 name = "ActiveDirectoryMembershipProvider";
             }
+            this.name = name;
 
             // Provide description.
             if (string.IsNullOrWhiteSpace(config["description"]))
             {
                 config.Remove("description");
                 config.Add("description", "Active Directory Membership Provider");
-            }            
+            }      
+      
+            // Process user caching.
+            if (!string.IsNullOrWhiteSpace(config["cacheUsers"]) && (config["cacheUsers"].ToLower() == "true"))
+            {
+                this.cacheUsers = true;
+            }
+            else
+            {
+                this.cacheUsers = false;
+            }
 
             // Initialize library.
-            this.adLibrary = new ActiveDirectoryLibrary(config);
+            this.adLibrary = new ActiveDirectoryLibrary(name, config);
 
             // Remove processed elements from config to avoid error in base class.
             config.Remove("connectionDomain");
@@ -45,7 +61,8 @@ namespace ActiveDirectoryAspNetProvider
             config.Remove("rolesToRenameTo");
             config.Remove("allowedUsers");
             config.Remove("allowedRoles");
-            config.Remove("cacheRolesInCookie");
+            config.Remove("cacheRoles");
+            config.Remove("cacheUsers");
             config.Remove("ignoreDefaultRoles");
             config.Remove("ignoreDefaultUsers");
 
@@ -77,20 +94,68 @@ namespace ActiveDirectoryAspNetProvider
                 var roles = this.adLibrary.GetRolesForUser(username);
 
                 // If there is at least one role returned, return true.  Otherwise, return false so user cannot login.
-                if (roles.Any())
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return roles.Any();
             }
             else
             {
                 // Roles not restricted.  If user made it this far, they are valid.
                 return true;
             }
+        }
+
+        public override MembershipUser GetUser(string username, bool userIsOnline)
+        {
+            // If no username provided, return null.
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                return null;
+            }
+
+            // Determine session variable name.
+            var sessName = this.name + "_Users";
+
+            // See if user value has been cached.
+            ActiveDirectorySessionCache sessionCache;
+            if ((this.cacheUsers) && (HttpContext.Current.User.Identity != null))
+            {
+                // Attempt to load 
+                if (HttpContext.Current.Session[sessName] != null)
+                {
+                    // Get string.  Split into array and return.
+                    try
+                    {
+                        sessionCache = HttpContext.Current.Session[sessName] as ActiveDirectorySessionCache;
+                        if ((sessionCache != null) && (sessionCache.Username == HttpContext.Current.User.Identity.Name) && (sessionCache.User != null))
+                        {
+                            return sessionCache.User;
+                        }
+                    }
+                    catch (Exception)
+                    {
+                        // In case of error, continue on.
+                    }
+                }
+            }
+
+            // Get user from base class.
+            var user = base.GetUser(username, userIsOnline);
+
+            // Cache roles if currently logged in user is one we are searching for.
+            if ((this.cacheUsers) && (HttpContext.Current.User.Identity != null) && (HttpContext.Current.User.Identity.Name == username))
+            {
+                // Initialize session cache if needed.
+                if (HttpContext.Current.Session[sessName] == null)
+                {
+                    HttpContext.Current.Session[sessName] = new ActiveDirectorySessionCache();
+                }
+
+                // Store information in cache.
+                sessionCache = HttpContext.Current.Session[sessName] as ActiveDirectorySessionCache;
+                sessionCache.Username = username;
+                sessionCache.User = user;
+            }
+
+            return user;
         }
     }
 }
