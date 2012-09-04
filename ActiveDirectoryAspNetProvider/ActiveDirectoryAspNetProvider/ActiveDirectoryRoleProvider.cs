@@ -38,7 +38,7 @@ namespace ActiveDirectoryAspNetProvider
             }
 
             // Initialize library.
-            this.adLibrary = new ActiveDirectoryLibrary(config);
+            this.adLibrary = new ActiveDirectoryLibrary(name, config);
 
             // Initialize base class.
             base.Initialize(name, config);
