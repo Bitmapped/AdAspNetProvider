@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>$title$</title>
+    <authors>$author$</authors>
+    <owners>$author$</owners>
+    <licenseUrl>http://adaspnetprovider.codeplex.com/license</licenseUrl>
+    <projectUrl>http://adaspnetprovider.codeplex.com/</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>$description$</description>
+    <releaseNotes>Ground-up rewrite of providers and supporting classes.</releaseNotes>
+    <copyright>Copyright 2013, $author$</copyright>
+    <tags>MembershipProvider RoleProbvider ActiveDirectory ActiveDirectoryRoleProvider ActiveDirectoryMembershipProvicer</tags>
+  </metadata>
+</package>
