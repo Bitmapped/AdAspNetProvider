@@ -48,7 +48,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActiveDirectory\AdConfiguration.cs" />
+    <Compile Include="ActiveDirectory\AdConnection.cs" />
+    <Compile Include="ActiveDirectory\Support\ActiveDirectory.cs" />
+    <Compile Include="ActiveDirectory\Support\AdConfiguration.cs" />
+    <Compile Include="ActiveDirectory\Support\Dns.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Provider\ActiveDirectoryMembershipProvider.cs" />
+    <Compile Include="Provider\ActiveDirectoryRoleProvider.cs" />
+    <Compile Include="Provider\ActiveDirectoryRoleProviderCache.cs" />
+    <Compile Include="Provider\ProviderConfiguration.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

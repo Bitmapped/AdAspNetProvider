@@ -6,11 +6,11 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("AdAspNetProvider")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyDescription("ASP.NET role and membership providers for Active Directory.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("The Brian Powell Computers")]
+[assembly: AssemblyCompany("Brian M. Powell")]
 [assembly: AssemblyProduct("AdAspNetProvider")]
-[assembly: AssemblyCopyright("Copyright © The Brian Powell Computers 2013")]
+[assembly: AssemblyCopyright("Copyright ©2013, Brian M. Powell")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("3.0.0.0")]
+[assembly: AssemblyFileVersion("3.0.0.0")]
