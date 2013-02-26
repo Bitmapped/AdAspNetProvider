@@ -45,7 +45,7 @@ namespace AdAspNetProvider.Provider
             }
 
             // Process configuration.
-            this.Config = new ProviderConfiguration(config);
+            this.Config = new ProviderConfiguration(name, config);
 
             // Get Active Directory connection.
             this.adConnect = new ActiveDirectory.AdConnection(this.Config);
@@ -126,7 +126,7 @@ namespace AdAspNetProvider.Provider
             string[] roles = null;
 
             // Check cache.
-            string cacheKey = "__ACTIVEDIRECTORYROLEPROVIDER__" + this.Config.ConnectionStringName + "_" + username;
+            string cacheKey = "__ACTIVEDIRECTORYROLEPROVIDER__" + this.Config.Name + "_" + username;
             HttpContext currentContext = HttpContext.Current;
             if (currentContext != null)
             {

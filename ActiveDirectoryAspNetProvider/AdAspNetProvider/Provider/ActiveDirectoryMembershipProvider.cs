@@ -45,7 +45,7 @@ namespace AdAspNetProvider.Provider
             }
 
             // Process configuration.
-            this.Config = new ProviderConfiguration(config);
+            this.Config = new ProviderConfiguration(name, config);
 
             // If needed to check allowedRoles, get AdConnection.
             if (this.Config.AllowedGroups.Any())
@@ -124,7 +124,7 @@ namespace AdAspNetProvider.Provider
                 string[] roles = null;
 
                 // Check cache.  Use different key than ActiveDirectoryRoleProvider to avoid complications in case of different settings.
-                string cacheKey = "__ACTIVEDIRECTORYMEMBERSHIPPROVIDER__" + this.Config.ConnectionStringName + "_" + username;
+                string cacheKey = "__ACTIVEDIRECTORYMEMBERSHIPPROVIDER__" + this.Config.Name + "_" + username;
                 HttpContext currentContext = HttpContext.Current;
                 if (currentContext != null)
                 {
