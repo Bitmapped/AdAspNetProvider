@@ -10,7 +10,7 @@
     <projectUrl>http://adaspnetprovider.codeplex.com/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Ground-up rewrite of providers and supporting classes.</releaseNotes>
+    <releaseNotes>Correct handling of provider name.  Use provider name in cache key.</releaseNotes>
     <copyright>Copyright 2013, $author$</copyright>
     <tags>MembershipProvider RoleProbvider ActiveDirectory ActiveDirectoryRoleProvider ActiveDirectoryMembershipProvicer</tags>
   </metadata>
