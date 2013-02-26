@@ -12,7 +12,13 @@ namespace AdAspNetProvider.Provider
 {
     public class ProviderConfiguration : AdAspNetProvider.ActiveDirectory.AdConfiguration
     {
-        public ProviderConfiguration(NameValueCollection config) : base()
+        /// <summary>
+        /// Constructor, processes input configuration parameters
+        /// </summary>
+        /// <param name="name">Name of provider.</param>
+        /// <param name="config">Configuration settings.</param>
+        public ProviderConfiguration(string name, NameValueCollection config)
+            : base()
         {
             // Check to ensure configuration is specified.
             if (config == null)
@@ -53,7 +59,7 @@ namespace AdAspNetProvider.Provider
             this.Password = string.IsNullOrWhiteSpace(config["connectionPassword"]) ? null : config["connectionPassword"];
 
             // Store connection name.
-            this.Name = config["name"];
+            this.Name = name;
 
             // Process default users to ignore.
             if (!string.IsNullOrWhiteSpace(config["ignoreDefaultUsers"]) && (config["ignoreDefaultUsers"].ToLower() == "false"))
