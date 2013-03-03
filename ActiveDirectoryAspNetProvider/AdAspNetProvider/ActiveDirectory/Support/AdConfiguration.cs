@@ -19,6 +19,9 @@ namespace AdAspNetProvider.ActiveDirectory.Support
 
             // Specify default context options.  Negotiate, signing, and sealing are default used by PrincipalContext.
             this.ContextOptions = ContextOptions.Negotiate | ContextOptions.Signing | ContextOptions.Sealing;
+
+            // Specify default identity type.
+            this.IdentityType = IdentityType.SamAccountName;
         }
 
         /// <summary>
@@ -56,6 +59,12 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// </summary>
         [System.ComponentModel.DefaultValue(true)]
         public bool Secure { get; set; }
+
+        /// <summary>
+        /// Identity type to search.
+        /// </summary>
+        [System.ComponentModel.DefaultValue(IdentityType.SamAccountName)]
+        public IdentityType IdentityType { get; set; }
 
         /// <summary>
         /// Method to implement ICloneable, duplicate this object.

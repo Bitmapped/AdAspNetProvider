@@ -57,24 +57,34 @@ namespace AdAspNetProvider.ActiveDirectory.Support
             return context.ValidateCredentials(username, password);
         }
 
+        /// <summary>
+        /// Load the listed group.
+        /// </summary>
+        /// <param name="group">Group to load.</param>
+        /// <returns>Object representing group or null if doesn't exist.</returns>
         public GroupPrincipal GetGroup(string group)
         {
             // Get new principal context.
             var context = this.GetPrincipalContext();
 
             // Get group.
-            var groupPrincipal = GroupPrincipal.FindByIdentity(context, group);
+            var groupPrincipal = GroupPrincipal.FindByIdentity(context, this.Config.IdentityType, group);
 
             return groupPrincipal;
         }
 
+        /// <summary>
+        /// Load the listed user.
+        /// </summary>
+        /// <param name="username">Username to load.</param>
+        /// <returns>Object representing user or null if doesn't exist.</returns>
         public UserPrincipal GetUser(string username)
         {
             // Get new principal context.
             var context = this.GetPrincipalContext();
 
             // Get user.
-            var userPrincipal = UserPrincipal.FindByIdentity(context, username);
+            var userPrincipal = UserPrincipal.FindByIdentity(context, this.Config.IdentityType, username);
 
             return userPrincipal;
         }

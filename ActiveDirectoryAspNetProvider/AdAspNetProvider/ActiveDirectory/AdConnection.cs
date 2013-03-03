@@ -202,8 +202,41 @@ namespace AdAspNetProvider.ActiveDirectory
             // Iterate through entries.
             foreach (var principal in principals)
             {
-                // Add SAM name to list.
-                names.Add(principal.SamAccountName);
+                // Get name of principal.
+                string principalName = null;
+
+                switch (this.Config.IdentityType)
+                {
+                    case IdentityType.SamAccountName:
+                        principalName = principal.SamAccountName;
+                        break;
+
+                    case IdentityType.Name:
+                        principalName = principal.Name;
+                        break;
+
+                    case IdentityType.UserPrincipalName:
+                        principalName = principal.UserPrincipalName;
+                        break;
+
+                    case IdentityType.DistinguishedName:
+                        principalName = principal.DistinguishedName;
+                        break;
+
+                    case IdentityType.Sid:
+                        principalName = principal.Sid.ToString();
+                        break;
+
+                    case IdentityType.Guid:
+                        principalName = principal.Guid.ToString();
+                        break;
+                }
+
+                // Add SAM name to list if not null.
+                if (principalName != null)
+                {
+                    names.Add(principalName);
+                }
             }
 
             return names;
