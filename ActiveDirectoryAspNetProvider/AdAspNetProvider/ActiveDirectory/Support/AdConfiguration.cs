@@ -27,11 +27,13 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <summary>
         /// Context type for connection.
         /// </summary>
+        [System.ComponentModel.DefaultValue(ContextType.Domain)]
         public ContextType ContextType { get; set; }
 
         /// <summary>
         /// Define context options.
         /// </summary>
+        [System.ComponentModel.DefaultValue(ContextOptions.Negotiate | ContextOptions.Signing | ContextOptions.Sealing)]
         public ContextOptions ContextOptions { get; set; }
 
         /// <summary>
@@ -53,12 +55,6 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// Password for connection.
         /// </summary>
         public string Password { get; set; }
-
-        /// <summary>
-        /// Use secure connection.  Default is true.
-        /// </summary>
-        [System.ComponentModel.DefaultValue(true)]
-        public bool Secure { get; set; }
 
         /// <summary>
         /// Identity type to search.

@@ -7,6 +7,7 @@ using AdAspNetProvider.ActiveDirectory;
 using System.Collections.Specialized;
 using System.Configuration.Provider;
 using System.Configuration;
+using System.DirectoryServices.AccountManagement;
 
 namespace AdAspNetProvider.Provider
 {
@@ -190,7 +191,41 @@ namespace AdAspNetProvider.Provider
                 {
                     this.CacheDurationInMinutes = Convert.ToInt32(config["cacheDurationInMinutes"]);
                 }
-                catch (Exception) { }
+                catch { }
+            }
+
+            // Set identity type.  User "attributeMapUsername" parameter to be consistent with Microsoft ActiveDirectoryMembershipProvider.
+            if (!string.IsNullOrWhiteSpace(config["attributeMapUsername"]))
+            {
+                switch (config["attributeMapUsername"].ToLower())
+                {
+                    case "samaccountname":
+                        this.IdentityType = IdentityType.SamAccountName;
+                        break;
+
+                    case "name":
+                        this.IdentityType = IdentityType.Name;
+                        break;
+
+                    case "userprincipalname":
+                        this.IdentityType = IdentityType.UserPrincipalName;
+                        break;
+
+                    case "distinguishedname":
+                        this.IdentityType = IdentityType.DistinguishedName;
+                        break;
+
+                    case "sid":
+                        this.IdentityType = IdentityType.Sid;
+                        break;
+
+                    case "guid":
+                        this.IdentityType = IdentityType.Guid;
+                        break;
+
+                    default:
+                        throw new ProviderException("The specified attributeMapUsername value is not valid.");
+                }
             }
         }
 
