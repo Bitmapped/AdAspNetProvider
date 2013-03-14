@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AdAspNetProvider.ActiveDirectory.Support;
 using System.DirectoryServices.AccountManagement;
+using System.DirectoryServices;
 
 namespace AdAspNetProvider.ActiveDirectory
 {
@@ -204,33 +205,12 @@ namespace AdAspNetProvider.ActiveDirectory
             {
                 // Get name of principal.
                 string principalName = null;
-
-                switch (this.Config.IdentityType)
+                try
                 {
-                    case IdentityType.SamAccountName:
-                        principalName = principal.SamAccountName;
-                        break;
-
-                    case IdentityType.Name:
-                        principalName = principal.Name;
-                        break;
-
-                    case IdentityType.UserPrincipalName:
-                        principalName = principal.UserPrincipalName;
-                        break;
-
-                    case IdentityType.DistinguishedName:
-                        principalName = principal.DistinguishedName;
-                        break;
-
-                    case IdentityType.Sid:
-                        principalName = principal.Sid.ToString();
-                        break;
-
-                    case IdentityType.Guid:
-                        principalName = principal.Guid.ToString();
-                        break;
+                    // Extract name from underlying DirectoryEntry object.
+                    principalName = ((DirectoryEntry)principal.GetUnderlyingObject()).Properties[this.Config.IdentityType.ToString()].Value.ToString();
                 }
+                catch { }
 
                 // Add SAM name to list if not null.
                 if (principalName != null)

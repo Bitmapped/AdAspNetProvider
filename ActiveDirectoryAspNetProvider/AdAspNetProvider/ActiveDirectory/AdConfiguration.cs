@@ -46,11 +46,22 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <summary>
         /// Groups to ignore in results.
         /// </summary>
+        [System.ComponentModel.DefaultValue(new string[] {"Domain Guests", "Domain Computers", "Group Policy Creator Owners", "Guests", "Users",
+                "Domain Users", "Pre-Windows 2000 Compatible Access", "Exchange Domain Servers", "Schema Admins",
+                "Enterprise Admins", "Domain Admins", "Cert Publishers", "Backup Operators", "Account Operators",
+                "Server Operators", "Print Operators", "Replicator", "Domain Controllers", "WINS Users",
+                "DnsAdmins", "DnsUpdateProxy", "DHCP Users", "DHCP Administrators", "Exchange Services",
+                "Exchange Enterprise Servers", "Remote Desktop Users", "Network Configuration Operators",
+                "Incoming Forest Trust Builders", "Performance Monitor Users", "Performance Log Users",
+                "Windows Authorization Access Group", "Terminal Server License Servers", "Distributed COM Users",
+                "Administrators", "Everybody", "RAS and IAS Servers", "MTS Trusted Impersonators",
+                "MTS Impersonators", "Everyone", "LOCAL", "Authenticated Users"})]
         public List<string> GroupsToIgnore { get; set; }
 
         /// <summary>
         /// If specified, only return these users in results.
         /// </summary>
+        [System.ComponentModel.DefaultValue(new string[] { "Administrator", "TsInternetUser", "Guest", "krbtgt", "Replicate", "SERVICE", "SMSService"})]
         public List<string> AllowedUsers { get; set; }
 
         /// <summary>
