@@ -208,6 +208,7 @@ namespace AdAspNetProvider
                         break;
 
                     case "userprincipalname":
+                    default:
                         this.IdentityType = IdentityType.UserPrincipalName;
                         break;
 
@@ -222,9 +223,6 @@ namespace AdAspNetProvider
                     case "guid":
                         this.IdentityType = IdentityType.Guid;
                         break;
-
-                    default:
-                        throw new ProviderException("The specified attributeMapUsername value is not valid.");
                 }
             }
 
