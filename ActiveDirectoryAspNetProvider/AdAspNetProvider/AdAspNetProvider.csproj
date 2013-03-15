@@ -55,13 +55,16 @@
     <Compile Include="ActiveDirectory\Support\AdConfiguration.cs" />
     <Compile Include="ActiveDirectory\Support\Dns.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Provider\ActiveDirectoryMembershipProvider.cs" />
-    <Compile Include="Provider\ActiveDirectoryRoleProvider.cs" />
-    <Compile Include="Provider\ActiveDirectoryRoleProviderCache.cs" />
-    <Compile Include="Provider\ProviderConfiguration.cs" />
+    <Compile Include="ActiveDirectoryMembershipProvider.cs" />
+    <Compile Include="ActiveDirectoryRoleProvider.cs" />
+    <Compile Include="ActiveDirectoryRoleProviderCache.cs" />
+    <Compile Include="ProviderConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="AdAspNetProvider.nuspec" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Provider\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

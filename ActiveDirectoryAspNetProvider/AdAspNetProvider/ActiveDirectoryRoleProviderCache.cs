@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AdAspNetProvider.Provider
+namespace AdAspNetProvider
 {
     public class ActiveDirectoryRoleProviderCache
     {

@@ -10,7 +10,7 @@ using System.Configuration;
 using System.Configuration.Provider;
 using System.Collections.Specialized;
 
-namespace AdAspNetProvider.Provider
+namespace AdAspNetProvider
 {
     public class ActiveDirectoryMembershipProvider : System.Web.Security.ActiveDirectoryMembershipProvider
     {
