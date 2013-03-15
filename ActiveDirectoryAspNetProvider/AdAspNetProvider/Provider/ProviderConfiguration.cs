@@ -227,6 +227,16 @@ namespace AdAspNetProvider.Provider
                         throw new ProviderException("The specified attributeMapUsername value is not valid.");
                 }
             }
+
+            // Process enable search methods.
+            if (!string.IsNullOrWhiteSpace(config["enableSearchMethods"]) && (config["enableSearchMethods"].ToLower() == "true"))
+            {
+                this.EnableSearchMethods = true;
+            }
+            else
+            {
+                this.IgnoreDefaultUsers = false;
+            }
         }
 
         /// <summary>
@@ -258,12 +268,20 @@ namespace AdAspNetProvider.Provider
         /// <summary>
         /// Ignore default users
         /// </summary>
+        [System.ComponentModel.DefaultValue(true)]
         public bool IgnoreDefaultUsers { get; set; }
 
         /// <summary>
         /// Ignore default roles
         /// </summary>
+        [System.ComponentModel.DefaultValue(true)]
         public bool IgnoreDefaultRoles { get; set; }
+
+        /// <summary>
+        /// Allow use of search method functions.
+        /// </summary>
+        [System.ComponentModel.DefaultValue(false)]
+        public bool EnableSearchMethods { get; set; }
 
     }
 }
