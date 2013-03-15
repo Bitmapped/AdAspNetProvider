@@ -9,7 +9,7 @@ using System.Configuration.Provider;
 using System.Configuration;
 using System.DirectoryServices.AccountManagement;
 
-namespace AdAspNetProvider.Provider
+namespace AdAspNetProvider
 {
     public class ProviderConfiguration : AdAspNetProvider.ActiveDirectory.AdConfiguration
     {
