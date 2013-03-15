@@ -71,7 +71,7 @@ namespace AdAspNetProvider
             }
 
             // Initialize base class.
-            base.Initialize(name, admpConfig);
+            base.Initialize(name, this.admpConfig);
         }
 
         /// <summary>

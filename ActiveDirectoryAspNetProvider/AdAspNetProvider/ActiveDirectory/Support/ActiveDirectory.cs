@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
+using Logging = AdAspNetProvider.Logging;
 
 namespace AdAspNetProvider.ActiveDirectory.Support
 {
@@ -184,8 +185,11 @@ namespace AdAspNetProvider.ActiveDirectory.Support
                             principals.Add(newPrincipal);
                         }
                     }
-                    catch (PrincipalOperationException)
+                    catch (PrincipalOperationException pe)
                     {
+                        // Log error.
+                        Logging.Log.LogError(pe);
+
                         continue;
                     }
                 }
@@ -196,7 +200,6 @@ namespace AdAspNetProvider.ActiveDirectory.Support
 
             return principals;            
         }
-
 
         /// <summary>
         /// Determine if specified group exists.
@@ -331,8 +334,11 @@ namespace AdAspNetProvider.ActiveDirectory.Support
                         groups.Add(group);
                     }
                 }
-                catch (PrincipalOperationException)
+                catch (PrincipalOperationException pe)
                 {
+                    // Log error.
+                    Logging.Log.LogError(pe);
+
                     continue;
                 }
             }
@@ -425,7 +431,12 @@ namespace AdAspNetProvider.ActiveDirectory.Support
                 // If connection still failed, throw exception.
                 if (connectionFailed)
                 {
-                    throw new PrincipalServerDownException(this.Config.Server);
+                    var pe = new PrincipalServerDownException(this.Config.Server);
+
+                    // Ensure error gets logged.                    
+                    Logging.Log.LogError(pe);
+
+                    throw pe;
                 }
             }
 
