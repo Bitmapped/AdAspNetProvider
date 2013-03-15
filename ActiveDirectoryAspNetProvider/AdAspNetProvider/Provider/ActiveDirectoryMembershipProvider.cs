@@ -16,6 +16,7 @@ namespace AdAspNetProvider.Provider
     {
         #region Private variables
         private ActiveDirectory.AdConnection adConnect;
+        private NameValueCollection admpConfig;
         #endregion
 
         /// <summary>
@@ -54,7 +55,7 @@ namespace AdAspNetProvider.Provider
             }
 
             // Process config class for base provider to avoid errors.
-            NameValueCollection admpConfig = new NameValueCollection();
+            this.admpConfig = new NameValueCollection();
             List<string> admpAllowedConfig = new List<string>() { "connectionStringName", "connectionUsername", "connectionPassword", "connectionProtection",
                 "enablePasswordReset", "enableSearchMethods", "applicationName", "description", "requiresUniqueEmail", "clientSearchTimeout",
                 "serverSearchTimeout", "attributeMapPasswordQuestion", "attributeMapPasswordAnswer", "attributeMapFailedPasswordAnswerCount", "attributeMapFailedPasswordAnswerTime", 
@@ -65,7 +66,7 @@ namespace AdAspNetProvider.Provider
                 // If is in allowed list, add value to new admpConfig.
                 if (admpAllowedConfig.Contains(configSetting))
                 {
-                    admpConfig.Add(configSetting, config[configSetting]);
+                    this.admpConfig.Add(configSetting, config[configSetting]);
                 }
             }
 
@@ -94,6 +95,33 @@ namespace AdAspNetProvider.Provider
         }
 
         /// <summary>
+        /// Initialized AdConnection.
+        /// </summary>
+        /// <returns>True if connection has been initialized.</returns>
+        private bool InitializeAdConnection()
+        {
+            // If connection already exists, return true.
+            if (this.adConnect != null)
+            {
+                return true;
+            }
+
+            // Get connection.
+            this.adConnect = new ActiveDirectory.AdConnection(this.Config);
+
+            return (this.adConnect == null);
+        }
+
+        /// <summary>
+        /// Initialize base ActiveDirectoryMembershipProvider.
+        /// </summary>
+        private void InitializeBaseProvider()
+        {
+            // Initialize base.
+            base.Initialize(this.Name, this.admpConfig);
+        }
+
+        /// <summary>
         /// Validate user to make sure they have valid roles.
         /// </summary>
         /// <param name="username">Username to check.</param>
@@ -108,8 +136,11 @@ namespace AdAspNetProvider.Provider
                 return false;
             }
 
+            // Initialize AdConnection.
+            this.InitializeAdConnection();
+
             // Determine if user is valid.
-            var validUser = base.ValidateUser(username, password);
+            var validUser = this.adConnect.ValidateUser(username, password);
 
             // If user is not valid, return now.
             if (!validUser)
@@ -153,6 +184,5 @@ namespace AdAspNetProvider.Provider
                 return true;
             }
         }
-        
     }
 }

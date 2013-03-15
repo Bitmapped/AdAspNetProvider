@@ -112,6 +112,12 @@ namespace AdAspNetProvider.Provider
         /// <returns>List of roles</returns>
         public override string[] GetAllRoles()
         {
+            // Verify that search methods are allowed.
+            if (this.Config.EnableSearchMethods == false)
+            {
+                throw new NotSupportedException("Search methods are not enabled.");
+            }
+
             return this.adConnect.GetAllGroups().ToArray();
         }
 

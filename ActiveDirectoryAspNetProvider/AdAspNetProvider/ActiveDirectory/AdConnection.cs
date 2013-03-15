@@ -75,6 +75,12 @@ namespace AdAspNetProvider.ActiveDirectory
                 return false;
             }
 
+            // If list of allowed groups has not been specified, let valid user proceed.
+            if (this.Config.AllowedGroups.Any() == false)
+            {
+                return true;
+            }
+
             // If groups have been restricted, see if this user is a member of a valid group.
             var groups = this.GetGroupsForUser(username, this.Config.RecursiveGroupMembership);
 
