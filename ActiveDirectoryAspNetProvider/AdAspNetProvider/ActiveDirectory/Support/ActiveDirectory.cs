@@ -92,8 +92,11 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <summary>
         /// Get all users.
         /// </summary>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all users.</returns>
-        public ICollection<Principal> GetAllUsers()
+        public ICollection<Principal> GetAllUsers(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Get new principal context.
             var context = this.GetPrincipalContext();
@@ -101,29 +104,17 @@ namespace AdAspNetProvider.ActiveDirectory.Support
             // Get user principal.
             var userPrincipal = new UserPrincipal(context);
 
-            // Get search object.
-            var principalSearcher = new PrincipalSearcher(userPrincipal);
-
-            // Get and process results.
-            var users = new List<Principal>();
-            var principalResults = principalSearcher.FindAll();
-            foreach (Principal user in principalResults)
-            {
-                if (user != null)
-                {
-                    // Add valid user object to results.
-                    users.Add(user);
-                }
-            }
-
-            return users;
+            return this.GetAllPrincipals(userPrincipal, pageIndex, pageSize, sortOrder);
         }
 
         /// <summary>
         /// Get all groups.
         /// </summary>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all groups.</returns>
-        public ICollection<Principal> GetAllGroups()
+        public ICollection<Principal> GetAllGroups(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Get new principal context.
             var context = this.GetPrincipalContext();
@@ -131,37 +122,81 @@ namespace AdAspNetProvider.ActiveDirectory.Support
             // Get group principal.
             var groupPrincipal = new GroupPrincipal(context);
 
-            // Get search object.
-            var principalSearcher = new PrincipalSearcher(groupPrincipal);
+            return this.GetAllPrincipals(groupPrincipal, pageIndex, pageSize, sortOrder);
+        }
 
-            // Get and process results.
-            var groups = new List<Principal>();
-            var principalResults = principalSearcher.FindAll();
+        /// <summary>
+        /// Gets all principal objects matching the search principal.
+        /// </summary>
+        /// <param name="searchPrincipal">Principal to use as basis of search.</param>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
+        /// <returns>Collection of all matching principals.</returns>
+        private ICollection<Principal> GetAllPrincipals(Principal searchPrincipal, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        {
+            // Get principalSearch for this element.
+            var principalSearcher = new PrincipalSearcher(searchPrincipal);
+            
+            // Configure settings for underlying searcher.
+            var underlyingSearcher = (DirectorySearcher)principalSearcher.GetUnderlyingSearcher();
+            underlyingSearcher.PageSize = 0x200;
+            underlyingSearcher.PropertiesToLoad.Add(this.Config.IdentityType.ToString().ToLower());
 
-            // Use group enumerator to loop because of issues with errors on sometimes-returned invalid SIDs.
-            // See: http://social.msdn.microsoft.com/Forums/en/csharpgeneral/thread/9dd81553-3539-4281-addd-3eb75e6e4d5d 
-            var groupEnum = principalResults.GetEnumerator();
-            while (groupEnum.MoveNext())
+            if (sortOrder.HasValue)
             {
-                Principal group = null;
-                try
-                {
-                    group = groupEnum.Current;
-
-                    if (group != null)
-                    {
-                        // Add group object to results.
-                        groups.Add(group);
-                    }
-                }
-                catch (PrincipalOperationException)
-                {
-                    continue;
-                }
+                underlyingSearcher.Sort = new SortOption(sortOrder.Value.ToString().ToLower(), SortDirection.Ascending);
+                underlyingSearcher.PropertiesToLoad.Add(sortOrder.Value.ToString().ToLower());
+            }
+            else
+            {
+                underlyingSearcher.Sort = new SortOption(this.Config.IdentityType.ToString().ToLower(), SortDirection.Ascending);
             }
 
-            return groups;
+            // Get and process results.
+            var principals = new List<Principal>();
+            var principalResults = principalSearcher.FindAll();
+
+            // Calculate begin and end points for results.
+            int startIndex = 0, endIndex = int.MaxValue;
+            if ((pageIndex != null) && (pageSize != null))
+            {
+                startIndex = pageIndex.Value * pageSize.Value;
+                endIndex = (pageIndex.Value + 1) * pageSize.Value;
+            }
+
+            // Use enumerator to loop because of issues with errors on sometimes-returned invalid SIDs.
+            // See: http://social.msdn.microsoft.com/Forums/en/csharpgeneral/thread/9dd81553-3539-4281-addd-3eb75e6e4d5d 
+            var principalEnum = principalResults.GetEnumerator();
+            int currentIndex = 0;
+            while (principalEnum.MoveNext())
+            {
+                if ((startIndex <= currentIndex) && (currentIndex < endIndex))
+                {
+                    Principal newPrincipal = null;
+                    try
+                    {
+                        newPrincipal = principalEnum.Current;
+
+                        if (newPrincipal != null)
+                        {
+                            // Add group object to results.
+                            principals.Add(newPrincipal);
+                        }
+                    }
+                    catch (PrincipalOperationException)
+                    {
+                        continue;
+                    }
+                }
+
+                // Increment counter.
+                currentIndex++;
+            }
+
+            return principals;            
         }
+
 
         /// <summary>
         /// Determine if specified group exists.

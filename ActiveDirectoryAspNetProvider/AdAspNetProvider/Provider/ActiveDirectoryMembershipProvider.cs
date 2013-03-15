@@ -56,7 +56,7 @@ namespace AdAspNetProvider.Provider
             // Process config class for base provider to avoid errors.
             NameValueCollection admpConfig = new NameValueCollection();
             List<string> admpAllowedConfig = new List<string>() { "connectionStringName", "connectionUsername", "connectionPassword", "connectionProtection",
-                "enablePasswordReset", "enableSearchMethods", "enableSearchMethods", "applicationName", "description", "requiresUniqueEmail", "clientSearchTimeout",
+                "enablePasswordReset", "enableSearchMethods", "applicationName", "description", "requiresUniqueEmail", "clientSearchTimeout",
                 "serverSearchTimeout", "attributeMapPasswordQuestion", "attributeMapPasswordAnswer", "attributeMapFailedPasswordAnswerCount", "attributeMapFailedPasswordAnswerTime", 
                 "attributeMapFailedPasswordAnswerLockoutTime", "attributeMapEmail", "attributeMapUsername", "maxInvalidPasswordAttempts", "passwordAttemptWindow",
                 "passwordAnswerAttemptLockoutDuration", "minRequiredPasswordLength", "minRequiredNonalphanumericCharacters", "passwordStrengthRegularExpression" };
