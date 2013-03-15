@@ -94,11 +94,14 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <summary>
         /// Get all groups.
         /// </summary>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all groups.</returns>
-        public ICollection<string> GetAllGroups()
+        public ICollection<string> GetAllGroups(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Get principals for all groups.
-            var groupPrincipals = this.adService.GetAllGroups();
+            var groupPrincipals = this.adService.GetAllGroups(pageIndex, pageSize, sortOrder);
 
             // Process entries.
             var groups = this.GetNamesFromPrincipals(groupPrincipals);
@@ -112,11 +115,14 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <summary>
         /// Get all users.
         /// </summary>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all users.</returns>
-        public ICollection<string> GetAllUsers()
+        public ICollection<string> GetAllUsers(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Get principals for all users.
-            var userPrincipals = this.adService.GetAllUsers();
+            var userPrincipals = this.adService.GetAllUsers(pageIndex, pageSize, sortOrder);
 
             // Process entries.
             var users = this.GetNamesFromPrincipals(userPrincipals);
