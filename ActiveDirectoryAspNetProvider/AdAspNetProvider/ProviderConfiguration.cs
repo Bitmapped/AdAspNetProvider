@@ -194,6 +194,17 @@ namespace AdAspNetProvider
                 catch { }
             }
 
+            // Set maximum number of attempts.
+            this.MaximumAttempts = 50;
+            if (!string.IsNullOrWhiteSpace(config["maximumAttempts"]))
+            {
+                try
+                {
+                    this.MaximumAttempts = Convert.ToInt32(config["maximumAttempts"]);
+                }
+                catch { }
+            }
+
             // Set identity type.  User "attributeMapUsername" parameter to be consistent with Microsoft ActiveDirectoryMembershipProvider.
             if (!string.IsNullOrWhiteSpace(config["attributeMapUsername"]))
             {
