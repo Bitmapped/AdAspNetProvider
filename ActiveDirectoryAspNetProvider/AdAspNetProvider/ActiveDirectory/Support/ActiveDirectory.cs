@@ -142,11 +142,57 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <summary>
         /// Load the listed user by email.
         /// </summary>
-        /// <param name="email">Email to load.</param>
+        /// <param name="username">Email to load.</param>
         /// <returns>Object representing user or null if doesn't exist.</returns>
         public UserPrincipal GetUserByEmail(string email)
         {
-            return (UserPrincipal)this.GetUsersByEmail(email).FirstOrDefault();
+            return (UserPrincipal)this.FindUsersByEmail(email).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Load the listed user by username.
+        /// </summary>
+        /// <param name="username">Username to load.</param>
+        /// <returns>Object representing user or null if doesn't exist.</returns>
+        public UserPrincipal GetUserByName(string username)
+        {
+            return (UserPrincipal)this.FindUsersByName(username).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// Get all users whose e-mail address matches the given string.
+        /// </summary>
+        /// <param name="username">E-mail address (full or partial) to match.</param>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by account name.</param>
+        /// <returns>Collection of all users.</returns>
+        public ICollection<Principal> FindUsersByName(string username, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = IdentityType.SamAccountName)
+        {
+            // Loop to re-attempt.
+            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            {
+                try
+                {
+                    // Get new principal context.
+                    var context = this.GetPrincipalContext(attempt);
+
+                    // Get user principal.
+                    var userPrincipal = new UserPrincipal(context);
+
+                    // Set user principal to search.  Pad with asterisks.
+                    userPrincipal.SamAccountName = "*" + username + "*";
+
+                    return this.GetAllPrincipals(userPrincipal, pageIndex, pageSize, sortOrder);
+                }
+                catch (PrincipalServerDownException)
+                { }
+            }
+
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            var pe = new PrincipalServerDownException(this.Config.Server);
+            Logging.Log.LogError(pe);
+            throw pe;
         }
 
         /// <summary>
@@ -157,7 +203,7 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all users.</returns>
-        public ICollection<Principal> GetUsersByEmail(string email, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        public ICollection<Principal> FindUsersByEmail(string email, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Loop to re-attempt.
             for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
