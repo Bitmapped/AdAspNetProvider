@@ -169,6 +169,12 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <returns>Collection of all users.</returns>
         public ICollection<Principal> FindUsersByName(string username, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = IdentityType.SamAccountName)
         {
+            // Ensure search criteria was specified.
+            if (String.IsNullOrWhiteSpace(username))
+            {
+                throw new ArgumentException("Invalid search criteria specified.");
+            }
+
             // Loop to re-attempt.
             for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
             {
@@ -205,6 +211,12 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <returns>Collection of all users.</returns>
         public ICollection<Principal> FindUsersByEmail(string email, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
+            // Ensure search criteria was specified.
+            if (String.IsNullOrWhiteSpace(email))
+            {
+                throw new ArgumentException("Invalid search criteria specified.");
+            }
+
             // Loop to re-attempt.
             for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
             {
