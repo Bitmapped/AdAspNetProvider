@@ -213,6 +213,8 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <returns>Collection of all matching principals.</returns>
         private ICollection<Principal> GetAllPrincipals(Principal searchPrincipal, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
+            // Since parents that call this function are wrapped in retry loops, this function should not be.
+
             // Get principalSearch for this element.
             var principalSearcher = new PrincipalSearcher(searchPrincipal);
 
@@ -315,28 +317,45 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <returns>Collection of users of group.</returns>
         public ICollection<Principal> GetUsersForGroup(string group, bool recursive = true)
         {
-            // Get group object.
-            var groupPrincipal = this.GetGroup(group);
-
-            // If group doesn't exist, return null.
-            if (groupPrincipal == null)
+            // Loop to re-attempt.
+            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
             {
-                return null;
-            }
-
-            // Get and process results.
-            var users = new List<Principal>();
-            var principalResults = groupPrincipal.GetMembers(recursive);
-            foreach (Principal user in principalResults)
-            {
-                if (user != null)
+                try
                 {
-                    // Add valid user object to results.
-                    users.Add(user);
+                    // Get new principal context.
+                    var context = this.GetPrincipalContext(attempt);
+
+                    // Get group object.
+                    var groupPrincipal = GroupPrincipal.FindByIdentity(context, this.Config.IdentityType, group);
+
+                    // If group doesn't exist, return null.
+                    if (groupPrincipal == null)
+                    {
+                        return null;
+                    }
+
+                    // Get and process results.
+                    var users = new List<Principal>();
+                    var principalResults = groupPrincipal.GetMembers(recursive);
+                    foreach (Principal user in principalResults)
+                    {
+                        if (user != null)
+                        {
+                            // Add valid user object to results.
+                            users.Add(user);
+                        }
+                    }
+
+                    return users;
                 }
+                catch (PrincipalServerDownException)
+                { }
             }
 
-            return users;
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            var pe = new PrincipalServerDownException(this.Config.Server);
+            Logging.Log.LogError(pe);
+            throw pe;            
         }
 
         /// <summary>
@@ -372,55 +391,74 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <returns>Collection of groups for which this user is a member.</returns>
         public ICollection<Principal> GetGroupsForUser(string username, bool recursive = true)
         {
-            // Get user object.
-            var userPrincipal = this.GetUser(username);
-
-            // If user doesn't exist, return null.
-            if (userPrincipal == null)
+            // Loop to re-attempt.
+            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
             {
-                return null;
-            }
-
-            // Get and process results.
-            var groups = new List<Principal>();
-            PrincipalSearchResult<Principal> principalResults;
-
-            // Depending on values, perform direct or recursive search.
-            if (recursive)
-            {
-                principalResults = userPrincipal.GetAuthorizationGroups();
-            }
-            else
-            {
-                principalResults = userPrincipal.GetGroups();
-            }
-
-            // Use group enumerator to loop because of issues with errors on sometimes-returned invalid SIDs.
-            // See: http://social.msdn.microsoft.com/Forums/en/csharpgeneral/thread/9dd81553-3539-4281-addd-3eb75e6e4d5d 
-            var groupEnum = principalResults.GetEnumerator();
-            while (groupEnum.MoveNext())
-            {
-                Principal group = null;
                 try
                 {
-                    group = groupEnum.Current;
+                    // Get new principal context.
+                    var context = this.GetPrincipalContext(attempt);
 
-                    if (group != null)
+                    // Get user object.
+                    var userPrincipal = UserPrincipal.FindByIdentity(context, this.Config.IdentityType, username);
+
+                    // If user doesn't exist, return null.
+                    if (userPrincipal == null)
                     {
-                        // Add group object to results.
-                        groups.Add(group);
+                        return null;
                     }
-                }
-                catch (PrincipalOperationException pe)
-                {
-                    // Log error.
-                    Logging.Log.LogError(pe);
 
-                    continue;
+                    // Get and process results.
+                    var groups = new List<Principal>();
+                    PrincipalSearchResult<Principal> principalResults;
+
+                    // Depending on values, perform direct or recursive search.
+                    if (recursive)
+                    {
+                        principalResults = userPrincipal.GetAuthorizationGroups();
+                    }
+                    else
+                    {
+                        principalResults = userPrincipal.GetGroups();
+                    }
+
+                    // Use group enumerator to loop because of issues with errors on sometimes-returned invalid SIDs.
+                    // See: http://social.msdn.microsoft.com/Forums/en/csharpgeneral/thread/9dd81553-3539-4281-addd-3eb75e6e4d5d 
+                    var groupEnum = principalResults.GetEnumerator();
+                    while (groupEnum.MoveNext())
+                    {
+                        Principal group = null;
+                        try
+                        {
+                            group = groupEnum.Current;
+
+                            if (group != null)
+                            {
+                                // Add group object to results.
+                                groups.Add(group);
+                            }
+                        }
+                        catch (PrincipalOperationException poe)
+                        {
+                            // Log error.
+                            Logging.Log.LogError(poe);
+
+                            continue;
+                        }
+                    }
+
+                    return groups;
                 }
+                catch (PrincipalServerDownException)
+                { }
             }
 
-            return groups;
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            var pe = new PrincipalServerDownException(this.Config.Server);
+            Logging.Log.LogError(pe);
+            throw pe;
+
+            
         }
 
         #region Support methods
