@@ -22,6 +22,9 @@ namespace AdAspNetProvider.ActiveDirectory.Support
 
             // Specify default identity type.
             this.IdentityType = IdentityType.SamAccountName;
+
+            // Specify default maximum number of attempts.
+            this.MaximumAttempts = 50;
         }
 
         /// <summary>
@@ -61,6 +64,12 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// </summary>
         [System.ComponentModel.DefaultValue(IdentityType.SamAccountName)]
         public IdentityType IdentityType { get; set; }
+
+        /// <summary>
+        /// Maximum number of times to attempt operation before failing.
+        /// </summary>
+        [System.ComponentModel.DefaultValue(50)]
+        public int MaximumAttempts { get; set; }
 
         /// <summary>
         /// Method to implement ICloneable, duplicate this object.

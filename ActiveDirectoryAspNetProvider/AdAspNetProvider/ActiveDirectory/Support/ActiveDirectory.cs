@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
+using System.Net;
 using Logging = AdAspNetProvider.Logging;
 
 namespace AdAspNetProvider.ActiveDirectory.Support
@@ -14,7 +15,8 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <summary>
         /// Active Directory configuration settings
         /// </summary>
-        public AdConfiguration Config { get; set; }
+        public AdConfiguration Config { get; private set; }
+
 
         #region Constructors
         /// <summary>
@@ -24,7 +26,7 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <param name="username">Username to use for connection.</param>
         /// <param name="password">Password to use for connection.</param>
         public ActiveDirectory(string server, string username, string password)
-            : this(new AdConfiguration{ Server = server, Username = username, Password = password })
+            : this(new AdConfiguration { Server = server, Username = username, Password = password })
         { }
 
         /// <summary>
@@ -44,6 +46,8 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         }
         #endregion
 
+
+
         /// <summary>
         /// Validate that user is authorized.
         /// </summary>
@@ -52,10 +56,27 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <returns>True/false if user can be validated.</returns>
         public bool ValidateUser(string username, string password)
         {
-            // Get new principal context.
-            var context = this.GetPrincipalContext(false);
+            // Loop to re-attempt.
+            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            {
+                try
+                {
+                    // Get new principal context.
+                    var context = this.GetPrincipalContext(attempt);
 
-            return context.ValidateCredentials(username, password);
+                    // Get group.
+                    var validCredentials = context.ValidateCredentials(username, password);
+
+                    return validCredentials;
+                }
+                catch (PrincipalServerDownException)
+                { }
+            }
+
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            var pe = new PrincipalServerDownException(this.Config.Server);
+            Logging.Log.LogError(pe);
+            throw pe;
         }
 
         /// <summary>
@@ -65,13 +86,27 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <returns>Object representing group or null if doesn't exist.</returns>
         public GroupPrincipal GetGroup(string group)
         {
-            // Get new principal context.
-            var context = this.GetPrincipalContext();
+            // Loop to re-attempt.
+            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            {
+                try
+                {
+                    // Get new principal context.
+                    var context = this.GetPrincipalContext(attempt);
 
-            // Get group.
-            var groupPrincipal = GroupPrincipal.FindByIdentity(context, this.Config.IdentityType, group);
+                    // Get group.
+                    var groupPrincipal = GroupPrincipal.FindByIdentity(context, this.Config.IdentityType, group);
 
-            return groupPrincipal;
+                    return groupPrincipal;
+                }
+                catch (PrincipalServerDownException)
+                { }
+            }
+
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            var pe = new PrincipalServerDownException(this.Config.Server);
+            Logging.Log.LogError(pe);
+            throw pe;
         }
 
         /// <summary>
@@ -81,13 +116,27 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <returns>Object representing user or null if doesn't exist.</returns>
         public UserPrincipal GetUser(string username)
         {
-            // Get new principal context.
-            var context = this.GetPrincipalContext();
+            // Loop to re-attempt.
+            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            {
+                try
+                {
+                    // Get new principal context.
+                    var context = this.GetPrincipalContext(attempt);
 
-            // Get user.
-            var userPrincipal = UserPrincipal.FindByIdentity(context, this.Config.IdentityType, username);
+                    // Get user.
+                    var userPrincipal = UserPrincipal.FindByIdentity(context, this.Config.IdentityType, username);
 
-            return userPrincipal;
+                    return userPrincipal;
+                }
+                catch (PrincipalServerDownException)
+                { }
+            }
+
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            var pe = new PrincipalServerDownException(this.Config.Server);
+            Logging.Log.LogError(pe);
+            throw pe;
         }
 
         /// <summary>
@@ -99,13 +148,27 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <returns>Collection of all users.</returns>
         public ICollection<Principal> GetAllUsers(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
-            // Get new principal context.
-            var context = this.GetPrincipalContext();
+            // Loop to re-attempt.
+            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            {
+                try
+                {
+                    // Get new principal context.
+                    var context = this.GetPrincipalContext(attempt);
 
-            // Get user principal.
-            var userPrincipal = new UserPrincipal(context);
+                    // Get user principal.
+                    var userPrincipal = new UserPrincipal(context);
 
-            return this.GetAllPrincipals(userPrincipal, pageIndex, pageSize, sortOrder);
+                    return this.GetAllPrincipals(userPrincipal, pageIndex, pageSize, sortOrder);
+                }
+                catch (PrincipalServerDownException)
+                { }
+            }
+
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            var pe = new PrincipalServerDownException(this.Config.Server);
+            Logging.Log.LogError(pe);
+            throw pe;
         }
 
         /// <summary>
@@ -117,13 +180,27 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <returns>Collection of all groups.</returns>
         public ICollection<Principal> GetAllGroups(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
-            // Get new principal context.
-            var context = this.GetPrincipalContext();
+            // Loop to re-attempt.
+            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            {
+                try
+                {
+                    // Get new principal context.
+                    var context = this.GetPrincipalContext(attempt);
 
-            // Get group principal.
-            var groupPrincipal = new GroupPrincipal(context);
+                    // Get group principal.
+                    var groupPrincipal = new GroupPrincipal(context);
 
-            return this.GetAllPrincipals(groupPrincipal, pageIndex, pageSize, sortOrder);
+                    return this.GetAllPrincipals(groupPrincipal, pageIndex, pageSize, sortOrder);
+                }
+                catch (PrincipalServerDownException)
+                { }
+            }
+
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            var pe = new PrincipalServerDownException(this.Config.Server);
+            Logging.Log.LogError(pe);
+            throw pe;
         }
 
         /// <summary>
@@ -138,7 +215,7 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         {
             // Get principalSearch for this element.
             var principalSearcher = new PrincipalSearcher(searchPrincipal);
-            
+
             // Configure settings for underlying searcher.
             var underlyingSearcher = (DirectorySearcher)principalSearcher.GetUnderlyingSearcher();
             underlyingSearcher.PageSize = 0x200;
@@ -198,7 +275,7 @@ namespace AdAspNetProvider.ActiveDirectory.Support
                 currentIndex++;
             }
 
-            return principals;            
+            return principals;
         }
 
         /// <summary>
@@ -307,7 +384,7 @@ namespace AdAspNetProvider.ActiveDirectory.Support
             // Get and process results.
             var groups = new List<Principal>();
             PrincipalSearchResult<Principal> principalResults;
-            
+
             // Depending on values, perform direct or recursive search.
             if (recursive)
             {
@@ -348,102 +425,53 @@ namespace AdAspNetProvider.ActiveDirectory.Support
 
         #region Support methods
         /// <summary>
-        /// Get principal context.
+        /// Gets principal context for accessing Active Direcotry.
         /// </summary>
-        /// <param name="validateConnection">If true, attempts to validate connection.</param>
-        /// <returns>PrincipalContextObject.</returns>
-        private PrincipalContext GetPrincipalContext(bool validateConnection = true)
+        /// <param name="attempt">Current attempt number for working through list of servers in order.</param>
+        /// <returns>PrincipalContext for interacting with Active Directory.</returns>
+        private PrincipalContext GetPrincipalContext(int? attempt = null)
         {
             // Define variable to store context.
             PrincipalContext context = null;
 
-            // Create connextion based on type.
+            // If no server is specified, just create a new context using specified context type.
             if (String.IsNullOrWhiteSpace(this.Config.Server))
             {
-                // Get new context.  Do not perform any testing.
                 context = new PrincipalContext(this.Config.ContextType);
+                return context;
+            }
+
+            // Get server IPs.
+            var serverIPs = Dns.GetIpAddresses(this.Config.Server);
+
+            // Determine which server to try.  If attempt number is specified, work through returned IPs in order.  Otherwise, select random.
+            IPAddress serverIP = null;
+            if (attempt == null)
+            {
+                // Get random number.
+                var random = new Random();
+
+                serverIP = serverIPs[random.Next(serverIPs.Count())];
             }
             else
             {
-                // Server name was specified.  Get DNS values.
-                var serverIPs = Dns.GetIpAddresses(this.Config.Server);
-                if (!serverIPs.Any())
-                {
-                    throw new ArgumentException("Specified server cannot be found.");
-                }
-
-                // Loop through to repeat attemption connections to server 5 times.
-                bool connectionFailed = false;
-                for (int retryIdx = 0; retryIdx < 5; retryIdx++)
-                {
-                    // Loop through to attempt connection to each server.
-                    foreach (var serverIP in serverIPs)
-                    {
-                        try
-                        {
-                            // Create new connection.  Method varies depending on if username and password are specified.
-                            if (!String.IsNullOrWhiteSpace(this.Config.Username) && !String.IsNullOrWhiteSpace(this.Config.Password))
-                            {
-                                // Username and password specified.
-                                context = new PrincipalContext(this.Config.ContextType, serverIP.ToString(), this.Config.Container, this.Config.ContextOptions, this.Config.Username, this.Config.Password);
-                                
-                                // Attempt to validate connection.
-                                if (validateConnection)
-                                {
-                                    if (context.ValidateCredentials(this.Config.Username, this.Config.Password) == false)
-                                    {
-                                        throw new PrincipalOperationException("Cannot connect to specified server using provided credentials.");
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                context = new PrincipalContext(this.Config.ContextType, serverIP.ToString(), this.Config.Container, this.Config.ContextOptions);
-
-                                // Attempt to validate connection.
-                                if (validateConnection)
-                                {
-                                    if (context.ValidateCredentials(null, null) == false)
-                                    {
-                                        throw new PrincipalOperationException("Cannot connect to specified server.");
-                                    }
-                                }
-                            }
-
-                            // Assume that connection did not fail.
-                            connectionFailed = false;
-                            break;
-                        }
-                        catch (PrincipalServerDownException)
-                        {
-                            // Record that connection failed.
-                            connectionFailed = true;
-                        }
-                    }
-
-                    // If connection did not fail, we can break out of loop.
-                    if (!connectionFailed)
-                    {
-                        break;
-                    }
-                }
-
-                // If connection still failed, throw exception.
-                if (connectionFailed)
-                {
-                    var pe = new PrincipalServerDownException(this.Config.Server);
-
-                    // Ensure error gets logged.                    
-                    Logging.Log.LogError(pe);
-
-                    throw pe;
-                }
+                serverIP = serverIPs[attempt.Value % serverIPs.Count()];
             }
 
-            // Return principal context.
+            // Create new connection.  Method varies depending on if username and password are specified.
+            if (!String.IsNullOrWhiteSpace(this.Config.Username) && !String.IsNullOrWhiteSpace(this.Config.Password))
+            {
+                // Username and password specified.
+                context = new PrincipalContext(this.Config.ContextType, serverIP.ToString(), this.Config.Container, this.Config.ContextOptions, this.Config.Username, this.Config.Password);
+
+            }
+            else
+            {
+                context = new PrincipalContext(this.Config.ContextType, serverIP.ToString(), this.Config.Container, this.Config.ContextOptions);
+            }
+
             return context;
         }
         #endregion
-
     }
 }
