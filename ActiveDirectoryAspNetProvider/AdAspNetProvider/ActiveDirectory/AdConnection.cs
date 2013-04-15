@@ -134,7 +134,7 @@ namespace AdAspNetProvider.ActiveDirectory
             var users = this.GetNamesFromPrincipals(userPrincipals);
 
             // Process users for rename, ignore, and allowed.
-            users = this.ProcessRemameIgnoredAllowedUsers(users);
+            users = this.ProcessIgnoredAllowedUsers(users);
 
             return users;
         }
@@ -164,7 +164,7 @@ namespace AdAspNetProvider.ActiveDirectory
             var users = this.GetNamesFromPrincipals(userPrincipals);
 
             // Process users for rename, ignore, and allowed.
-            users = this.ProcessRemameIgnoredAllowedUsers(users);
+            users = this.ProcessIgnoredAllowedUsers(users);
 
             return users;
         }
@@ -281,7 +281,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// </summary>
         /// <param name="originalUsers">Original collection of users.</param>
         /// <returns>Processed collection of users.</returns>
-        private ICollection<string> ProcessRemameIgnoredAllowedUsers(ICollection<string> originalUsers)
+        private ICollection<string> ProcessIgnoredAllowedUsers(ICollection<string> originalUsers)
         {
             // New list of users.
             var processedUsers = new List<string>();
