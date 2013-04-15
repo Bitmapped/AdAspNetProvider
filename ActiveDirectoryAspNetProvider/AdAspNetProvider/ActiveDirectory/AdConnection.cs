@@ -88,6 +88,63 @@ namespace AdAspNetProvider.ActiveDirectory
         }
 
         /// <summary>
+        /// Load the listed user.
+        /// </summary>
+        /// <param name="username">Username to load.</param>
+        /// <returns>Object representing user or null if doesn't exist.</returns>
+        public UserPrincipal GetUser(string username)
+        {
+            // Check to make sure user if allowed, if appropriate.
+            if (this.Config.AllowedUsers.Any() && !this.Config.AllowedUsers.Contains(username))
+            {
+                // Restricted users, and this user is not one of them.
+                return null;
+            }
+
+            var user = this.adService.GetUser(username);
+
+            return user;
+        }
+
+        /// <summary>
+        /// Load the listed user by email.
+        /// </summary>
+        /// <param name="username">Email to load.</param>
+        /// <returns>Object representing user or null if doesn't exist.</returns>
+        public UserPrincipal GetUserByEmail(string email)
+        {
+            var user = this.adService.GetUserByEmail(email);
+
+            // Check to make sure user if allowed, if appropriate.
+            if (this.Config.AllowedUsers.Any() && !this.Config.AllowedUsers.Contains(user.SamAccountName))
+            {
+                // Restricted users, and this user is not one of them.
+                return null;
+            }
+
+            return user;
+        }
+
+        /// <summary>
+        /// Load the listed user by Sid.
+        /// </summary>
+        /// <param name="sid">Sid to load.</param>
+        /// <returns>Object representing user or null if doesn't exist.</returns>
+        public UserPrincipal GetUserBySid(string sid)
+        {
+            var user = this.adService.GetUserBySid(sid);
+
+            // Check to make sure user if allowed, if appropriate.
+            if (this.Config.AllowedUsers.Any() && !this.Config.AllowedUsers.Contains(user.SamAccountName))
+            {
+                // Restricted users, and this user is not one of them.
+                return null;
+            }
+
+            return user;
+        }
+
+        /// <summary>
         /// Determine if specified group exists.
         /// </summary>
         /// <param name="group">Group to test.</param>
@@ -215,14 +272,7 @@ namespace AdAspNetProvider.ActiveDirectory
             // Iterate through entries.
             foreach (var principal in principals)
             {
-                // Get name of principal.
-                string principalName = null;
-                try
-                {
-                    // Extract name from underlying DirectoryEntry object.
-                    principalName = ((DirectoryEntry)principal.GetUnderlyingObject()).Properties[this.Config.IdentityType.ToString()].Value.ToString();
-                }
-                catch { }
+                var principalName = this.GetNameFromPrincipal(principal);
 
                 // Add SAM name to list if not null.
                 if (principalName != null)
@@ -232,6 +282,25 @@ namespace AdAspNetProvider.ActiveDirectory
             }
 
             return names;
+        }
+
+        /// <summary>
+        /// Gets the specified name for one principal.
+        /// </summary>
+        /// <param name="principal">Principal to process.</param>
+        /// <returns>Name for principal.</returns>
+        public string GetNameFromPrincipal(Principal principal)
+        {
+            // Get name of principal.
+            string principalName = null;
+            try
+            {
+                // Extract name from underlying DirectoryEntry object.
+                principalName = ((DirectoryEntry)principal.GetUnderlyingObject()).Properties[this.Config.IdentityType.ToString()].Value.ToString();
+            }
+            catch { }
+
+            return principalName;
         }
         #endregion
 

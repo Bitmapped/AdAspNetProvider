@@ -150,13 +150,33 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         }
 
         /// <summary>
-        /// Load the listed user by username.
+        /// Load the listed user by SID.
         /// </summary>
-        /// <param name="username">Username to load.</param>
+        /// <param name="sid">SID to load.</param>
         /// <returns>Object representing user or null if doesn't exist.</returns>
-        public UserPrincipal GetUserByName(string username)
+        public UserPrincipal GetUserBySid(string sid)
         {
-            return (UserPrincipal)this.FindUsersByName(username).FirstOrDefault();
+            // Loop to re-attempt.
+            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            {
+                try
+                {
+                    // Get new principal context.
+                    var context = this.GetPrincipalContext(attempt);
+
+                    // Get user.
+                    var userPrincipal = UserPrincipal.FindByIdentity(context, IdentityType.Sid, sid);
+
+                    return userPrincipal;
+                }
+                catch (PrincipalServerDownException)
+                { }
+            }
+
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            var pe = new PrincipalServerDownException(this.Config.Server);
+            Logging.Log.LogError(pe);
+            throw pe;
         }
 
         /// <summary>

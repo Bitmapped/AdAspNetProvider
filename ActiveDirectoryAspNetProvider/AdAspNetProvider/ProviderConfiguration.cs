@@ -151,35 +151,6 @@ namespace AdAspNetProvider
                 }
             }
 
-            // Process users to rename.
-            if ((!String.IsNullOrWhiteSpace(config["usersToRenameFrom"])) && (!String.IsNullOrWhiteSpace(config["usersToRenameTo"])))
-            {
-                var usersToRenameFrom = config["usersToRenameFrom"].Split(',').Select(role => role.Trim()).ToList();
-                var usersToRenameTo = config["usersToRenameTo"].Split(',').Select(role => role.Trim()).ToList();
-
-                // Verify two lists have same number of members.
-                if (usersToRenameFrom.Count() != usersToRenameTo.Count())
-                {
-                    throw new ProviderException("Must be same number of users to rename from as to.");
-                }
-
-                // Add rename elements to list.
-                for (int i = 0; i < usersToRenameFrom.Count(); i++)
-                {
-                    try
-                    {
-                        if (!String.IsNullOrWhiteSpace(usersToRenameFrom[i]) && !String.IsNullOrWhiteSpace(usersToRenameTo[i]))
-                        {
-                            this.UsersToRename.Add(usersToRenameFrom[i], usersToRenameTo[i]);
-                        }
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        throw new ProviderException("Role name can only be renamed once.", ex);
-                    }
-                }
-            }
-
             // Store application name.
             this.ApplicationName = config["applicationName"];
             
