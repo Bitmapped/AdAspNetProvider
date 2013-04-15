@@ -67,7 +67,7 @@ namespace AdAspNetProvider.ActiveDirectory
             }
 
             // Check to see if user is valid in Active Directory.
-            var validUser = this.adService.ValidateUser(this.GetRenamedFromUser(username), password);
+            var validUser = this.adService.ValidateUser(username, password);
 
             // If user is not valid, stop checking.
             if (!validUser)
@@ -146,7 +146,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <returns>True/false if user exists.</returns>
         public bool UserExists(string username)
         {
-            return this.adService.UserExists(this.GetRenamedFromUser(username));
+            return this.adService.UserExists(username);
         }
 
         /// <summary>
@@ -178,7 +178,7 @@ namespace AdAspNetProvider.ActiveDirectory
         public ICollection<string> GetGroupsForUser(string username, bool recursive = true)
         {
             // Get principals for groups.
-            var groupPrincipals = this.adService.GetGroupsForUser(this.GetRenamedFromUser(username), recursive);
+            var groupPrincipals = this.adService.GetGroupsForUser(username, recursive);
 
             // Process entries.
             var groups = this.GetNamesFromPrincipals(groupPrincipals);
@@ -198,7 +198,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <returns>True/false if user is a member of the specified group.</returns>
         public bool IsUserInGroup(string group, string username, bool recursive = true)
         {
-            return this.adService.IsUserInGroup(this.GetRenamedFromGroup(group), this.GetRenamedFromUser(username), recursive);
+            return this.adService.IsUserInGroup(this.GetRenamedFromGroup(group), username, recursive);
         }
 
         #region Support class for processing entries.
@@ -236,24 +236,6 @@ namespace AdAspNetProvider.ActiveDirectory
         #endregion
 
         #region Support classes for cleaning up user and group members and names.
-        /// <summary>
-        /// Get renamed name for specified user.
-        /// </summary>
-        /// <param name="renameFrom">User to rename.</param>
-        /// <returns>Renamed name.</returns>
-        private string GetRenamedUser(string renameFrom)
-        {
-            // If rename list contains renameFrom, get it svalue.
-            if (this.Config.UsersToRename.ContainsKey(renameFrom))
-            {
-                return this.Config.UsersToRename[renameFrom];
-            }
-            else
-            {
-                return renameFrom;
-            }
-        }
-
         /// <summary>
         /// Gets renamed name for specified group.
         /// </summary>
@@ -295,28 +277,6 @@ namespace AdAspNetProvider.ActiveDirectory
         }
 
         /// <summary>
-        /// Given new name for renamed user, find original name.
-        /// </summary>
-        /// <param name="renameTo">New name for user.</param>
-        /// <returns>Original name.</returns>
-        private string GetRenamedFromUser(string renameTo)
-        {
-            // If rename list contains renameTo, get its key.
-            if (this.Config.UsersToRename.ContainsValue(renameTo))
-            {
-                // Try fetching corresponding rename entry.
-                var rename = this.Config.UsersToRename.FirstOrDefault(x => x.Value == renameTo);
-
-                return rename.Key;
-            }
-            else
-            {
-                // Rename did not exist.  Return original name.
-                return renameTo;
-            }
-        }
-
-        /// <summary>
         /// Processes collection of users to rename, ignore, and allow users.
         /// </summary>
         /// <param name="originalUsers">Original collection of users.</param>
@@ -330,7 +290,7 @@ namespace AdAspNetProvider.ActiveDirectory
             foreach (var originalUser in originalUsers)
             {
                 // Rename user.
-                processedUsers.Add(GetRenamedUser(originalUser));
+                processedUsers.Add(originalUser);
             }
 
             // Filter for allowed users.

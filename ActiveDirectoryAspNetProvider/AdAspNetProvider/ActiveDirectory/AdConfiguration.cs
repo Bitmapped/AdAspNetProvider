@@ -31,7 +31,6 @@ namespace AdAspNetProvider.ActiveDirectory
             // Initialize containers.
             this.AllowedUsers = new List<string>();
             this.AllowedGroups = new List<string>();
-            this.UsersToRename = new Dictionary<string, string>();
             this.GroupsToRename = new Dictionary<string, string>();
 
             // Search recursively by default.
@@ -68,11 +67,6 @@ namespace AdAspNetProvider.ActiveDirectory
         /// If specified, only return these groups in results.
         /// </summary>
         public List<string> AllowedGroups { get; set; }
-
-        /// <summary>
-        /// Users to be renamed with oldname, newname.
-        /// </summary>
-        public Dictionary<string, string> UsersToRename { get; set; }
 
         /// <summary>
         /// Groups to be renamed with oldname, newname.
