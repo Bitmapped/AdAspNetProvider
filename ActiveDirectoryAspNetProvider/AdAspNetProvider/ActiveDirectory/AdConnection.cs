@@ -187,11 +187,11 @@ namespace AdAspNetProvider.ActiveDirectory
             // Get principals for all users.
             var userPrincipals = this.adService.GetAllUsers(pageIndex, pageSize, sortOrder);
 
+            // Process users for ignore and allowed.
+            userPrincipals = this.ProcessIgnoredAllowedUsers(userPrincipals);
+
             // Process entries.
             var users = this.GetNamesFromPrincipals(userPrincipals);
-
-            // Process users for rename, ignore, and allowed.
-            users = this.ProcessIgnoredAllowedUsers(users);
 
             return users;
         }
@@ -217,11 +217,11 @@ namespace AdAspNetProvider.ActiveDirectory
             // Get principals for users.
             var userPrincipals = this.adService.GetUsersForGroup(this.GetRenamedFromGroup(group), recursive);
 
+            // Process users for ignore and allowed.
+            userPrincipals = this.ProcessIgnoredAllowedUsers(userPrincipals);
+
             // Process entries.
             var users = this.GetNamesFromPrincipals(userPrincipals);
-
-            // Process users for rename, ignore, and allowed.
-            users = this.ProcessIgnoredAllowedUsers(users);
 
             return users;
         }
@@ -350,27 +350,36 @@ namespace AdAspNetProvider.ActiveDirectory
         /// </summary>
         /// <param name="originalUsers">Original collection of users.</param>
         /// <returns>Processed collection of users.</returns>
-        private ICollection<string> ProcessIgnoredAllowedUsers(ICollection<string> originalUsers)
+        private ICollection<Principal> ProcessIgnoredAllowedUsers(ICollection<Principal> originalUsers)
         {
             // New list of users.
-            var processedUsers = new List<string>();
-
-            // Iterate through list of original users.
-            foreach (var originalUser in originalUsers)
-            {
-                // Rename user.
-                processedUsers.Add(originalUser);
-            }
+            var processedUsers = new List<Principal>();
 
             // Filter for allowed users.
             if (this.Config.AllowedUsers.Any())
             {
-                // List of allowed users specified.  Compare against this list.
-                processedUsers = processedUsers.Intersect(this.Config.AllowedUsers).ToList();
+                // Iterate through list of original users to see if they are allowed.
+                foreach (var originalUser in originalUsers)
+                {
+                    if (this.Config.AllowedUsers.Contains(this.GetNameFromPrincipal(originalUser)))
+                    {
+                        // User on allowed list.  Add to output.
+                        processedUsers.Add(originalUser);
+                    }
+                }
             }
-
-            // Exclude ignored users.
-            processedUsers = processedUsers.Except(this.Config.UsersToIgnore).ToList();
+            else
+            {
+                // Iterate through list of original users to see if they are to be ignored.
+                foreach (var originalUser in originalUsers)
+                {
+                    if (this.Config.UsersToIgnore.Contains(this.GetNameFromPrincipal(originalUser)) == false)
+                    {
+                        // User not on ignore list.  Add to output.
+                        processedUsers.Add(originalUser);
+                    }
+                }
+            }
 
             return processedUsers;
         }
