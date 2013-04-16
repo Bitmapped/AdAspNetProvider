@@ -227,6 +227,44 @@ namespace AdAspNetProvider.ActiveDirectory
         }
 
         /// <summary>
+        /// Find all users whose e-mail address matches the given string.
+        /// </summary>
+        /// <param name="email">E-mail address (full or partial) to match.</param>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
+        /// <returns>Collection of all users.</returns>
+        public ICollection<Principal> FindUsersByEmail(string email, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        {
+            // Get principals that match email.
+            var userPrincipals = this.adService.FindUsersByEmail(email, pageIndex, pageSize, sortOrder);
+
+            // Process users for ignore and allowed.
+            userPrincipals = this.ProcessIgnoredAllowedUsers(userPrincipals);
+
+            return userPrincipals;
+        }
+
+        /// <summary>
+        /// Find all users whose username matches the given string.
+        /// </summary>
+        /// <param name="username">E-mail address (full or partial) to match.</param>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by account name.</param>
+        /// <returns>Collection of all users.</returns>
+        public ICollection<Principal> FindUsersByName(string username, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = IdentityType.SamAccountName)
+        {
+            // Get principals that match email.
+            var userPrincipals = this.adService.FindUsersByName(username, pageIndex, pageSize, sortOrder);
+
+            // Process users for ignore and allowed.
+            userPrincipals = this.ProcessIgnoredAllowedUsers(userPrincipals);
+
+            return userPrincipals;
+        }
+
+        /// <summary>
         /// Determine if specified user exists.
         /// </summary>
         /// <param name="username">Username to test.</param>

@@ -186,7 +186,35 @@ namespace AdAspNetProvider
                 throw new NotSupportedException("Search methods are not enabled.");
             }
 
-            throw new NotImplementedException();
+            // Find users.
+            var users = this.adConnect.FindUsersByEmail(emailToMatch, pageIndex, pageSize);
+
+            // Process users to create collection.
+            var collection = new MembershipUserCollection();
+            foreach (UserPrincipal user in users)
+            {
+                var membershipUser = new MembershipUser(providerName: this.Config.Name,
+                                                    name: this.adConnect.GetNameFromPrincipal(user),
+                                                    providerUserKey: user.Sid,
+                                                    email: user.EmailAddress,
+                                                    passwordQuestion: "",
+                                                    comment: "",
+                                                    isApproved: true,
+                                                    isLockedOut: user.IsAccountLockedOut(),
+                                                    creationDate: user.LastLogon.HasValue ? user.LastLogon.Value : DateTime.Now,
+                                                    lastLoginDate: user.LastLogon.HasValue ? user.LastLogon.Value : DateTime.Now,
+                                                    lastActivityDate: user.LastLogon.HasValue ? user.LastLogon.Value : DateTime.Now,
+                                                    lastPasswordChangedDate: user.LastPasswordSet.HasValue ? user.LastPasswordSet.Value : DateTime.Now,
+                                                    lastLockoutDate: user.AccountLockoutTime.HasValue ? user.AccountLockoutTime.Value : DateTime.Now
+                                                    );
+
+                collection.Add(membershipUser);
+            }
+
+            // Assign total number of records.
+            totalRecords = collection.Count;
+
+            return collection;
         }
 
         public override MembershipUserCollection FindUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
@@ -197,7 +225,35 @@ namespace AdAspNetProvider
                 throw new NotSupportedException("Search methods are not enabled.");
             }
 
-            throw new NotImplementedException();
+            // Find users.
+            var users = this.adConnect.FindUsersByName(usernameToMatch, pageIndex, pageSize);
+
+            // Process users to create collection.
+            var collection = new MembershipUserCollection();
+            foreach (UserPrincipal user in users)
+            {
+                var membershipUser = new MembershipUser(providerName: this.Config.Name,
+                                                    name: this.adConnect.GetNameFromPrincipal(user),
+                                                    providerUserKey: user.Sid,
+                                                    email: user.EmailAddress,
+                                                    passwordQuestion: "",
+                                                    comment: "",
+                                                    isApproved: true,
+                                                    isLockedOut: user.IsAccountLockedOut(),
+                                                    creationDate: user.LastLogon.HasValue ? user.LastLogon.Value : DateTime.Now,
+                                                    lastLoginDate: user.LastLogon.HasValue ? user.LastLogon.Value : DateTime.Now,
+                                                    lastActivityDate: user.LastLogon.HasValue ? user.LastLogon.Value : DateTime.Now,
+                                                    lastPasswordChangedDate: user.LastPasswordSet.HasValue ? user.LastPasswordSet.Value : DateTime.Now,
+                                                    lastLockoutDate: user.AccountLockoutTime.HasValue ? user.AccountLockoutTime.Value : DateTime.Now
+                                                    );
+
+                collection.Add(membershipUser);
+            }
+
+            // Assign total number of records.
+            totalRecords = collection.Count;
+
+            return collection;
         }
 
         /// <summary>

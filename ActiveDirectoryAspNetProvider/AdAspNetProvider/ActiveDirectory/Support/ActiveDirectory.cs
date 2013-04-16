@@ -180,7 +180,7 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         }
 
         /// <summary>
-        /// Get all users whose e-mail address matches the given string.
+        /// Find all users whose username matches the given string.
         /// </summary>
         /// <param name="username">E-mail address (full or partial) to match.</param>
         /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
@@ -222,7 +222,7 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         }
 
         /// <summary>
-        /// Get all users whose e-mail address matches the given string.
+        /// Find all users whose e-mail address matches the given string.
         /// </summary>
         /// <param name="email">E-mail address (full or partial) to match.</param>
         /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
