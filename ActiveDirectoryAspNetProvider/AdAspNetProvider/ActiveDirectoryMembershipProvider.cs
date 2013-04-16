@@ -180,7 +180,7 @@ namespace AdAspNetProvider
             {
                 var membershipUser = new MembershipUser(providerName: this.Config.Name,
                                                     name: this.adConnect.GetNameFromPrincipal(user),
-                                                    providerUserKey: user.Sid,
+                                                    providerUserKey: user.Sid.ToString(),
                                                     email: user.EmailAddress,
                                                     passwordQuestion: "",
                                                     comment: "",
@@ -219,7 +219,7 @@ namespace AdAspNetProvider
             {
                 var membershipUser = new MembershipUser(providerName: this.Config.Name,
                                                     name: this.adConnect.GetNameFromPrincipal(user),
-                                                    providerUserKey: user.Sid,
+                                                    providerUserKey: user.Sid.ToString(),
                                                     email: user.EmailAddress,
                                                     passwordQuestion: "",
                                                     comment: "",
@@ -265,7 +265,7 @@ namespace AdAspNetProvider
             {
                 var membershipUser = new MembershipUser(providerName: this.Config.Name,
                                                     name: this.adConnect.GetNameFromPrincipal(user),
-                                                    providerUserKey: user.Sid,
+                                                    providerUserKey: user.Sid.ToString(),
                                                     email: user.EmailAddress,
                                                     passwordQuestion: "",
                                                     comment: "",
@@ -305,7 +305,7 @@ namespace AdAspNetProvider
             // Create new membershipUser.
             var membershipUser = new MembershipUser(providerName: this.Config.Name,
                                                     name: this.adConnect.GetNameFromPrincipal(user),
-                                                    providerUserKey: user.Sid,
+                                                    providerUserKey: user.Sid.ToString(),
                                                     email: user.EmailAddress,
                                                     passwordQuestion: "",
                                                     comment: "",
@@ -333,12 +333,12 @@ namespace AdAspNetProvider
             this.InitializeAdConnection();
 
             // Get user.
-            var user = this.adConnect.GetUserBySid(providerUserKey as string);
+            var user = this.adConnect.GetUserBySid((string)providerUserKey);
 
             // Create new membershipUser.
             var membershipUser = new MembershipUser(providerName: this.Config.Name,
                                                     name: this.adConnect.GetNameFromPrincipal(user),
-                                                    providerUserKey: user.Sid,
+                                                    providerUserKey: user.Sid.ToString(),
                                                     email: user.EmailAddress,
                                                     passwordQuestion: "",
                                                     comment: "",
