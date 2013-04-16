@@ -8,34 +8,90 @@ using System.Net.Sockets;
 
 namespace AdAspNetProvider.ActiveDirectory.Support
 {
-    static public class Dns
+    public class Dns
     {
+        #region Constructor
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public Dns(AdConfiguration config)
+        {
+            // Initialize DnsCache.
+            this.DnsCache = new Dictionary<string, DnsCache>();
 
-        // Define cache for storing variables.
-        static private Dictionary<string, IPAddress[]> ipCache = new Dictionary<string, IPAddress[]>();
+            // Store configuration.
+            this.Config = config;
+        }
+        #endregion
+
+        /// <summary>
+        /// Cache for storing Dns entries.
+        /// </summary>
+        private Dictionary<string, DnsCache> DnsCache { get; set; }
+
+        /// <summary>
+        /// Stores configuration settings.
+        /// </summary>
+        private AdConfiguration Config { get; set; }
 
         /// <summary>
         /// Get IP addresses for the specified DNS host or IP address.
         /// </summary>
         /// <param name="host">Host to lookup.</param>
         /// <returns>IP addresses for host.</returns>
-        static public IPAddress[] GetIpAddresses(string host)
+        public IPAddress[] GetIpAddresses(string host)
         {
-            // See if IP addresses are cached.
-            if (Dns.ipCache.ContainsKey(host) && Dns.ipCache[host].Any())
+            // Load DNS entries into cache if needed.
+            if (!this.DnsCache.ContainsKey(host))
             {
-                return Dns.ipCache[host];
+                this.DnsCache.Add(host, new DnsCache(host, this.Config));
             }
 
-            // Values are not cached.  Load them up.
-            var ipAddresses = System.Net.Dns.GetHostAddresses(host);
+            // Get Ip addresses from cache.
+            return this.DnsCache[host].GetIpAddresses();
+        }
 
-            // Store values in cache.
-            Dns.ipCache.Remove(host);
-            Dns.ipCache.Add(host, ipAddresses);
+        /// <summary>
+        /// Gets next server IP to try.
+        /// </summary>
+        /// <param name="host">Hostname to use.</param>
+        /// <param name="attempt">Attempt number (for sequential selection of IPs) or null for random selection.</param>
+        /// <returns>Next server IP to use.</returns>
+        public IPAddress GetIpAddress(string host, int? attempt = null)
+        {
+            // Get server IPs.
+            var serverIPs = this.GetIpAddresses(host);
 
-            // Get host entry.
-            return ipAddresses;
+            // Determine which server to try.  If attempt number is specified, work through returned IPs in order.  Otherwise, select random.
+            IPAddress serverIP = null;
+            if (attempt == null)
+            {
+                // Get random number.
+                var random = new Random();
+
+                serverIP = serverIPs[random.Next(serverIPs.Count())];
+            }
+            else
+            {
+                serverIP = serverIPs[attempt.Value % serverIPs.Count()];
+            }
+
+            return serverIP;
+        }
+
+        /// <summary>
+        /// Records failure with specified server IP.
+        /// </summary>
+        /// <param name="host">Hostname being used.</param>
+        /// <param name="serverIP">IP address that failed.</param>
+        public void RecordFailure(string host, IPAddress serverIP)
+        {
+            // Ensure host is valid.
+            if (this.DnsCache.ContainsKey(host))
+            {
+                // Record failure on host.
+                this.DnsCache[host].RecordFailure(serverIP);
+            }
         }
     }
 }

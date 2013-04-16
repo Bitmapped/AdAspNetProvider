@@ -154,8 +154,7 @@ namespace AdAspNetProvider
             // Store application name.
             this.ApplicationName = config["applicationName"];
             
-            // Set default cache duration.
-            this.CacheDurationInMinutes = 30;
+            // Set cache duration.
             if (!string.IsNullOrWhiteSpace(config["cacheDurationInMinutes"]))
             {
                 try
@@ -166,12 +165,21 @@ namespace AdAspNetProvider
             }
 
             // Set maximum number of attempts.
-            this.MaximumAttempts = 50;
-            if (!string.IsNullOrWhiteSpace(config["maximumAttempts"]))
+            if (!string.IsNullOrWhiteSpace(config["maxAttempts"]))
             {
                 try
                 {
-                    this.MaximumAttempts = Convert.ToInt32(config["maximumAttempts"]);
+                    this.MaxAttempts = Convert.ToInt32(config["maxAttempts"]);
+                }
+                catch { }
+            }
+
+            // Set maximum number of server failures.
+            if (!string.IsNullOrWhiteSpace(config["maxServerFailures"]))
+            {
+                try
+                {
+                    this.MaxServerFailures = Convert.ToInt32(config["maxServerFailures"]);
                 }
                 catch { }
             }
@@ -218,12 +226,6 @@ namespace AdAspNetProvider
                 this.IgnoreDefaultUsers = false;
             }
         }
-
-        /// <summary>
-        /// Duration of cache (in minutes)
-        /// </summary>
-        [System.ComponentModel.DefaultValue(30)]
-        public int CacheDurationInMinutes { get; set; }
 
         /// <summary>
         /// Application name

@@ -24,7 +24,13 @@ namespace AdAspNetProvider.ActiveDirectory.Support
             this.IdentityType = IdentityType.SamAccountName;
 
             // Specify default maximum number of attempts.
-            this.MaximumAttempts = 50;
+            this.MaxAttempts = 50;
+
+            // Specify maximum number of times server can fail.
+            this.MaxServerFailures = 3;
+
+            // Specify default cache duration in minutes.
+            this.CacheDurationInMinutes = 30;
         }
 
         /// <summary>
@@ -69,7 +75,19 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// Maximum number of times to attempt operation before failing.
         /// </summary>
         [System.ComponentModel.DefaultValue(50)]
-        public int MaximumAttempts { get; set; }
+        public int MaxAttempts { get; set; }
+
+        /// <summary>
+        /// Maximum number of times server can fail before it is ignored.
+        /// </summary>
+        [System.ComponentModel.DefaultValue(3)]
+        public int MaxServerFailures { get; set; }
+
+        /// <summary>
+        /// Duration of cache (in minutes)
+        /// </summary>
+        [System.ComponentModel.DefaultValue(30)]
+        public int CacheDurationInMinutes { get; set; }
 
         /// <summary>
         /// Method to implement ICloneable, duplicate this object.
