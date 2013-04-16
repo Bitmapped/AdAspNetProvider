@@ -9,6 +9,8 @@ using System.Web.Security;
 using System.Configuration;
 using System.Configuration.Provider;
 using System.Collections.Specialized;
+using System.DirectoryServices;
+using System.DirectoryServices.AccountManagement;
 
 namespace AdAspNetProvider
 {
@@ -178,17 +180,70 @@ namespace AdAspNetProvider
 
         public override MembershipUserCollection FindUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
+            // Verify that search methods are allowed.
+            if (this.Config.EnableSearchMethods == false)
+            {
+                throw new NotSupportedException("Search methods are not enabled.");
+            }
+
             throw new NotImplementedException();
         }
 
         public override MembershipUserCollection FindUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
+            // Verify that search methods are allowed.
+            if (this.Config.EnableSearchMethods == false)
+            {
+                throw new NotSupportedException("Search methods are not enabled.");
+            }
+
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Get all users.
+        /// </summary>
+        /// <param name="pageIndex">Page index.</param>
+        /// <param name="pageSize">Page size.</param>
+        /// <param name="totalRecords">Out parameter for total number of records in collection.</param>
+        /// <returns>Collection of MembershipUser records.</returns>
         public override MembershipUserCollection GetAllUsers(int pageIndex, int pageSize, out int totalRecords)
         {
-            throw new NotImplementedException();
+            // Verify that search methods are allowed.
+            if (this.Config.EnableSearchMethods == false)
+            {
+                throw new NotSupportedException("Search methods are not enabled.");
+            }
+
+            // Get users.
+            var users = this.adConnect.GetAllUsers(pageIndex, pageSize);
+ 
+            // Process users to create collection.
+            var collection = new MembershipUserCollection();
+            foreach (UserPrincipal user in users)
+            {
+                var membershipUser = new MembershipUser(providerName: this.Config.Name,
+                                                    name: this.adConnect.GetNameFromPrincipal(user),
+                                                    providerUserKey: user.Sid,
+                                                    email: user.EmailAddress,
+                                                    passwordQuestion: "",
+                                                    comment: "",
+                                                    isApproved: true,
+                                                    isLockedOut: user.IsAccountLockedOut(),
+                                                    creationDate: user.LastLogon.HasValue ? user.LastLogon.Value : DateTime.Now,
+                                                    lastLoginDate: user.LastLogon.HasValue ? user.LastLogon.Value : DateTime.Now,
+                                                    lastActivityDate: user.LastLogon.HasValue ? user.LastLogon.Value : DateTime.Now,
+                                                    lastPasswordChangedDate: user.LastPasswordSet.HasValue ? user.LastPasswordSet.Value : DateTime.Now,
+                                                    lastLockoutDate: user.AccountLockoutTime.HasValue ? user.AccountLockoutTime.Value : DateTime.Now
+                                                    );
+
+                collection.Add(membershipUser);
+            }
+
+            // Assign total number of records.
+            totalRecords = collection.Count;
+
+            return collection;
         }
 
 
