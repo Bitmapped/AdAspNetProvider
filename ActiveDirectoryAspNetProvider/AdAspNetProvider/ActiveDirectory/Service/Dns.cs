@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
 
-namespace AdAspNetProvider.ActiveDirectory.Support
+namespace AdAspNetProvider.ActiveDirectory.Service
 {
     public class Dns
     {

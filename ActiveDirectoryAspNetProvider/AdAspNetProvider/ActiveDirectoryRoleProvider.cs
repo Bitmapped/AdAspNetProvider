@@ -15,7 +15,7 @@ namespace AdAspNetProvider
     public class ActiveDirectoryRoleProvider : RoleProvider
     {
         #region Private variables
-        private ActiveDirectory.AdConnection adConnect;
+        private ActiveDirectory.ActiveDirectory adConnect;
         #endregion
 
         #region Initialization methods
@@ -49,7 +49,7 @@ namespace AdAspNetProvider
             this.Config = new ProviderConfiguration(name, config);
 
             // Get Active Directory connection.
-            this.adConnect = new ActiveDirectory.AdConnection(this.Config);
+            this.adConnect = new ActiveDirectory.ActiveDirectory(this.Config);
 
             // Initialize base class.
             base.Initialize(name, config);

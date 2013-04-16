@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace AdAspNetProvider.ActiveDirectory
 {
-    public class AdConfiguration : AdAspNetProvider.ActiveDirectory.Support.AdConfiguration
+    public class AdConfiguration : AdAspNetProvider.ActiveDirectory.Service.AdConfiguration
     {
         /// <summary>
         /// Constructor to define default values.

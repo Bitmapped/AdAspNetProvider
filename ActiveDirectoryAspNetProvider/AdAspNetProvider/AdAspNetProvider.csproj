@@ -53,12 +53,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActiveDirectory\AdConfiguration.cs" />
-    <Compile Include="ActiveDirectory\AdConnection.cs" />
-    <Compile Include="ActiveDirectory\Support\ActiveDirectory.cs" />
-    <Compile Include="ActiveDirectory\Support\AdConfiguration.cs" />
-    <Compile Include="ActiveDirectory\Support\Dns.cs" />
-    <Compile Include="ActiveDirectory\Support\DnsCache.cs" />
-    <Compile Include="ActiveDirectory\Support\DnsCacheItem.cs" />
+    <Compile Include="ActiveDirectory\ActiveDirectory.cs" />
+    <Compile Include="ActiveDirectory\Service\AdService.cs" />
+    <Compile Include="ActiveDirectory\Service\AdConfiguration.cs" />
+    <Compile Include="ActiveDirectory\Service\Dns.cs" />
+    <Compile Include="ActiveDirectory\Service\DnsCache.cs" />
+    <Compile Include="ActiveDirectory\Service\DnsCacheItem.cs" />
     <Compile Include="Logging\Log.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ActiveDirectoryMembershipProvider.cs" />

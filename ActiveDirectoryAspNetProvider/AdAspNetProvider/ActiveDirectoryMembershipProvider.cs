@@ -17,8 +17,7 @@ namespace AdAspNetProvider
     public class ActiveDirectoryMembershipProvider : MembershipProvider
     {
         #region Private variables
-        private ActiveDirectory.AdConnection adConnect;
-        private NameValueCollection admpConfig;
+        private ActiveDirectory.ActiveDirectory adConnect;
         #endregion
 
         #region Initialization methods
@@ -54,27 +53,11 @@ namespace AdAspNetProvider
             // If needed to check allowedRoles, get AdConnection.
             if (this.Config.AllowedGroups.Any())
             {
-                this.adConnect = new ActiveDirectory.AdConnection(this.Config);
-            }
-
-            // Process config class for base provider to avoid errors.
-            this.admpConfig = new NameValueCollection();
-            List<string> admpAllowedConfig = new List<string>() { "connectionStringName", "connectionUsername", "connectionPassword", "connectionProtection",
-                "enablePasswordReset", "enableSearchMethods", "applicationName", "description", "requiresUniqueEmail", "clientSearchTimeout",
-                "serverSearchTimeout", "attributeMapPasswordQuestion", "attributeMapPasswordAnswer", "attributeMapFailedPasswordAnswerCount", "attributeMapFailedPasswordAnswerTime", 
-                "attributeMapFailedPasswordAnswerLockoutTime", "attributeMapEmail", "attributeMapUsername", "maxInvalidPasswordAttempts", "passwordAttemptWindow",
-                "passwordAnswerAttemptLockoutDuration", "minRequiredPasswordLength", "minRequiredNonalphanumericCharacters", "passwordStrengthRegularExpression" };
-            foreach (string configSetting in config.Keys)
-            {
-                // If is in allowed list, add value to new admpConfig.
-                if (admpAllowedConfig.Contains(configSetting))
-                {
-                    this.admpConfig.Add(configSetting, config[configSetting]);
-                }
+                this.adConnect = new ActiveDirectory.ActiveDirectory(this.Config);
             }
 
             // Initialize base class.
-            base.Initialize(name, this.admpConfig);
+            base.Initialize(name, config);
         }
 
         /// <summary>
@@ -111,7 +94,7 @@ namespace AdAspNetProvider
             }
 
             // Get connection.
-            this.adConnect = new ActiveDirectory.AdConnection(this.Config);
+            this.adConnect = new ActiveDirectory.ActiveDirectory(this.Config);
 
             return (this.adConnect == null);
         }

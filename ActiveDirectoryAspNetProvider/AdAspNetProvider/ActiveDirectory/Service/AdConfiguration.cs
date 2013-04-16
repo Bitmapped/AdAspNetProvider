@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.DirectoryServices.AccountManagement;
 
-namespace AdAspNetProvider.ActiveDirectory.Support
+namespace AdAspNetProvider.ActiveDirectory.Service
 {
     public class AdConfiguration
     {
