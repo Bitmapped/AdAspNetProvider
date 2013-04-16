@@ -170,7 +170,7 @@ namespace AdAspNetProvider.ActiveDirectory
             var groups = this.GetNamesFromPrincipals(groupPrincipals);
 
             // Process groups for rename, ignore, and allowed.
-            groups = this.ProcessRemameIgnoredAllowedGroups(groups);
+            groups = this.ProcessRenameIgnoredAllowedGroups(groups);
 
             return groups;
         }
@@ -241,7 +241,7 @@ namespace AdAspNetProvider.ActiveDirectory
             var groups = this.GetNamesFromPrincipals(groupPrincipals);
 
             // Process groups for rename, ignore, and allowed.
-            groups = this.ProcessRemameIgnoredAllowedGroups(groups);
+            groups = this.ProcessRenameIgnoredAllowedGroups(groups);
 
             return groups;
         }
@@ -389,7 +389,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// </summary>
         /// <param name="originalGroups">Original collection of groups.</param>
         /// <returns>Processed collection of groups.</returns>
-        private ICollection<string> ProcessRemameIgnoredAllowedGroups(ICollection<string> originalGroups)
+        private ICollection<string> ProcessRenameIgnoredAllowedGroups(ICollection<string> originalGroups)
         {
             // New list of users.
             var processedGroups = new List<string>();
