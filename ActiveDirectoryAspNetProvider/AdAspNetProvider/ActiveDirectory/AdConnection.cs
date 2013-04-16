@@ -28,7 +28,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="username">Username to use for connection.</param>
         /// <param name="password">Password to use for connection.</param>
         public AdConnection(string server, string username, string password)
-            : this(new AdConfiguration{ Server = server, Username = username, Password = password })
+            : this(new AdConfiguration { Server = server, Username = username, Password = password })
         { }
 
         /// <summary>
@@ -51,42 +51,55 @@ namespace AdAspNetProvider.ActiveDirectory
         }
         #endregion
 
+        #region Methods for groups
         /// <summary>
-        /// Validate that user is authorized.
+        /// Get all groups.
         /// </summary>
-        /// <param name="username">Username to check.</param>
-        /// <param name="password">Password to check.</param>
-        /// <returns>True/false if user can be validated.</returns>
-        public bool ValidateUser(string username, string password)
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
+        /// <returns>Collection of all groups.</returns>
+        public ICollection<Principal> GetAllGroups(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
-            // Check to make sure user if allowed, if appropriate.
-            if (this.Config.AllowedUsers.Any() && !this.Config.AllowedUsers.Contains(username))
-            {
-                // Restricted users, and this user is not one of them.
-                return false;
-            }
+            // Get principals for all groups.
+            var groupPrincipals = this.adService.GetAllGroups(pageIndex, pageSize, sortOrder);
 
-            // Check to see if user is valid in Active Directory.
-            var validUser = this.adService.ValidateUser(username, password);
+            // Process groups for rename, ignore, and allowed.
+            groupPrincipals = this.ProcessIgnoreAllowedGroups(groupPrincipals);
 
-            // If user is not valid, stop checking.
-            if (!validUser)
-            {
-                return false;
-            }
-
-            // If list of allowed groups has not been specified, let valid user proceed.
-            if (this.Config.AllowedGroups.Any() == false)
-            {
-                return true;
-            }
-
-            // If groups have been restricted, see if this user is a member of a valid group.
-            var groups = this.GetGroupsForUser(username, this.Config.RecursiveGroupMembership);
-
-            return groups.Any();            
+            return groupPrincipals;
         }
 
+        /// <summary>
+        /// Get all group names.
+        /// </summary>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
+        /// <returns>Collection of all groups.</returns>
+        public ICollection<string> GetAllGroupNames(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        {
+            // Get group principals.
+            var groupPrincipals = this.GetAllGroups(pageIndex, pageSize, sortOrder);
+
+            // Process entries.
+            var groups = this.GetNamesFromPrincipals(groupPrincipals);
+
+            return groups;
+        }
+
+        /// <summary>
+        /// Determine if specified group exists.
+        /// </summary>
+        /// <param name="group">Group to test.</param>
+        /// <returns>True/false if group exists.</returns>
+        public bool GroupExists(string group)
+        {
+            return this.adService.GroupExists(this.GetRenamedFromGroup(group));
+        }
+        #endregion
+
+        #region Methods for users.
         /// <summary>
         /// Load the listed user.
         /// </summary>
@@ -142,52 +155,6 @@ namespace AdAspNetProvider.ActiveDirectory
             }
 
             return user;
-        }
-
-        /// <summary>
-        /// Determine if specified group exists.
-        /// </summary>
-        /// <param name="group">Group to test.</param>
-        /// <returns>True/false if group exists.</returns>
-        public bool GroupExists(string group)
-        {
-            return this.adService.GroupExists(this.GetRenamedFromGroup(group));
-        }
-
-        /// <summary>
-        /// Get all groups.
-        /// </summary>
-        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
-        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
-        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
-        /// <returns>Collection of all groups.</returns>
-        public ICollection<Principal> GetAllGroups(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
-        {
-            // Get principals for all groups.
-            var groupPrincipals = this.adService.GetAllGroups(pageIndex, pageSize, sortOrder);
-
-            // Process groups for rename, ignore, and allowed.
-            groupPrincipals = this.ProcessRenameIgnoredAllowedGroups(groupPrincipals);            
-
-            return groupPrincipals;
-        }
-
-        /// <summary>
-        /// Get all group names.
-        /// </summary>
-        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
-        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
-        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
-        /// <returns>Collection of all groups.</returns>
-        public ICollection<string> GetAllGroupNames(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
-        {
-            // Get group principals.
-            var groupPrincipals = this.GetAllGroups(pageIndex, pageSize, sortOrder);
-
-            // Process entries.
-            var groups = this.GetNamesFromPrincipals(groupPrincipals);
-
-            return groups;
         }
 
         /// <summary>
@@ -275,18 +242,70 @@ namespace AdAspNetProvider.ActiveDirectory
         }
 
         /// <summary>
+        /// Validate that user is authorized.
+        /// </summary>
+        /// <param name="username">Username to check.</param>
+        /// <param name="password">Password to check.</param>
+        /// <returns>True/false if user can be validated.</returns>
+        public bool ValidateUser(string username, string password)
+        {
+            // Check to make sure user if allowed, if appropriate.
+            if (this.Config.AllowedUsers.Any() && !this.Config.AllowedUsers.Contains(username))
+            {
+                // Restricted users, and this user is not one of them.
+                return false;
+            }
+
+            // Check to see if user is valid in Active Directory.
+            var validUser = this.adService.ValidateUser(username, password);
+
+            // If user is not valid, stop checking.
+            if (!validUser)
+            {
+                return false;
+            }
+
+            // If list of allowed groups has not been specified, let valid user proceed.
+            if (this.Config.AllowedGroups.Any() == false)
+            {
+                return true;
+            }
+
+            // If groups have been restricted, see if this user is a member of a valid group.
+            var groups = this.GetGroupsForUser(username, this.Config.RecursiveGroupMembership);
+
+            return groups.Any();
+        }
+        #endregion
+
+        #region Methods for fetching user-group relationships.
+        /// <summary>
         /// Get users within a group.
         /// </summary>
         /// <param name="group">Group to test.</param>
         /// <param name="recursive">Recursively search children.</param>
         /// <returns>Collection of users of group.</returns>
-        public ICollection<string> GetUsersForGroup(string group, bool recursive = true)
+        public ICollection<Principal> GetUsersForGroup(string group, bool recursive = true)
         {
             // Get principals for users.
             var userPrincipals = this.adService.GetUsersForGroup(this.GetRenamedFromGroup(group), recursive);
 
             // Process users for ignore and allowed.
             userPrincipals = this.ProcessIgnoredAllowedUsers(userPrincipals);
+
+            return userPrincipals;
+        }
+
+        /// <summary>
+        /// Get user names within a group.
+        /// </summary>
+        /// <param name="group">Group to test.</param>
+        /// <param name="recursive">Recursively search children.</param>
+        /// <returns>Collection of users of group.</returns>
+        public ICollection<string> GetUserNamesForGroup(string group, bool recursive = true)
+        {
+            // Process users for ignore and allowed.
+            var userPrincipals = this.GetUsersForGroup(group, recursive);
 
             // Process entries.
             var users = this.GetNamesFromPrincipals(userPrincipals);
@@ -300,13 +319,27 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="username">Username to check.</param>
         /// <param name="recursive">Recursive search for groups.</param>
         /// <returns>Collection of groups for which this user is a member.</returns>
-        public ICollection<string> GetGroupsForUser(string username, bool recursive = true)
+        public ICollection<Principal> GetGroupsForUser(string username, bool recursive = true)
         {
             // Get principals for groups.
             var groupPrincipals = this.adService.GetGroupsForUser(username, recursive);
 
             // Process groups for rename, ignore, and allowed.
-            groupPrincipals = this.ProcessRenameIgnoredAllowedGroups(groupPrincipals);
+            groupPrincipals = this.ProcessIgnoreAllowedGroups(groupPrincipals);
+
+            return groupPrincipals;
+        }
+
+        /// <summary>
+        /// Get list of group names for this user is a member.
+        /// </summary>
+        /// <param name="username">Username to check.</param>
+        /// <param name="recursive">Recursive search for groups.</param>
+        /// <returns>Collection of groups for which this user is a member.</returns>
+        public ICollection<string> GetGroupNamesForUser(string username, bool recursive = true)
+        {
+            // Process groups for rename, ignore, and allowed.
+            var groupPrincipals = this.GetGroupsForUser(username, recursive);
 
             // Process entries.
             var groups = this.GetNamesFromPrincipals(groupPrincipals);
@@ -325,14 +358,15 @@ namespace AdAspNetProvider.ActiveDirectory
         {
             return this.adService.IsUserInGroup(this.GetRenamedFromGroup(group), username, recursive);
         }
+        #endregion
 
-        #region Support class for processing entries.
+        #region Support methods for processing principals.
         /// <summary>
         /// Processes list of principals to get names.
         /// </summary>
         /// <param name="principals">Collection of principals.</param>
         /// <returns>Collection of names.</returns>
-        private ICollection<string> GetNamesFromPrincipals(ICollection<Principal> principals)
+        public ICollection<string> GetNamesFromPrincipals(ICollection<Principal> principals)
         {
             // Collection of names.
             var names = new List<string>();
@@ -365,6 +399,12 @@ namespace AdAspNetProvider.ActiveDirectory
             {
                 // Extract name from underlying DirectoryEntry object.
                 principalName = ((DirectoryEntry)principal.GetUnderlyingObject()).Properties[this.Config.IdentityType.ToString()].Value.ToString();
+
+                // If principal is a group object, try to perform rename.
+                if (principal is GroupPrincipal)
+                {
+                    principalName = this.GetRenamedGroup(principalName);
+                }
             }
             catch { }
 
@@ -372,7 +412,7 @@ namespace AdAspNetProvider.ActiveDirectory
         }
         #endregion
 
-        #region Support classes for cleaning up user and group members and names.
+        #region Support methods for renaming groups.
         /// <summary>
         /// Gets renamed name for specified group.
         /// </summary>
@@ -412,7 +452,9 @@ namespace AdAspNetProvider.ActiveDirectory
                 return renameTo;
             }
         }
+        #endregion
 
+        #region Support methods for processing ignored and allowed users and groups.
         /// <summary>
         /// Processes collection of users to rename, ignore, and allow users.
         /// </summary>
@@ -453,11 +495,11 @@ namespace AdAspNetProvider.ActiveDirectory
         }
 
         /// <summary>
-        /// Processes collection of groups to rename, ignore, and allow users.
+        /// Processes collection of groups to ignore and allow.
         /// </summary>
         /// <param name="originalGroups">Original collection of groups.</param>
         /// <returns>Processed collection of groups.</returns>
-        private ICollection<Principal> ProcessRenameIgnoredAllowedGroups(ICollection<Principal> originalGroups)
+        private ICollection<Principal> ProcessIgnoreAllowedGroups(ICollection<Principal> originalGroups)
         {
             // New list of users.
             var processedGroups = new List<Principal>();
