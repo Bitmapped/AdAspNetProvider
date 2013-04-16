@@ -17,6 +17,11 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// </summary>
         public AdConfiguration Config { get; set; }
 
+        /// <summary>
+        /// Dns lookup and caching functionality
+        /// </summary>
+        private Dns Dns { get; set; }
+
         #region Constructors
         /// <summary>
         /// Create new Active Directory connection.
@@ -42,6 +47,9 @@ namespace AdAspNetProvider.ActiveDirectory.Support
 
             // Store configuration.
             this.Config = configuration;
+
+            // Initialize Dns configuration.
+            this.Dns = new Dns(this.Config);
         }
         #endregion
 
@@ -55,20 +63,27 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         public bool ValidateUser(string username, string password)
         {
             // Loop to re-attempt.
-            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
             {
+                // Get new principal context.
+                var context = this.GetPrincipalContext(attempt);
+
                 try
                 {
-                    // Get new principal context.
-                    var context = this.GetPrincipalContext(attempt);
-
                     // Get group.
                     var validCredentials = context.ValidateCredentials(username, password);
 
                     return validCredentials;
                 }
                 catch (PrincipalServerDownException)
-                { }
+                {
+                    // Determine IP of connected server and record failure if known.
+                    IPAddress serverIP = null;
+                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    {
+                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                    }
+                }
             }
 
             // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
@@ -85,20 +100,27 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         public UserPrincipal GetUser(string username)
         {
             // Loop to re-attempt.
-            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
             {
+                // Get new principal context.
+                var context = this.GetPrincipalContext(attempt);
+
                 try
                 {
-                    // Get new principal context.
-                    var context = this.GetPrincipalContext(attempt);
-
                     // Get user.
                     var userPrincipal = UserPrincipal.FindByIdentity(context, this.Config.IdentityType, username);
 
                     return userPrincipal;
                 }
                 catch (PrincipalServerDownException)
-                { }
+                {
+                    // Determine IP of connected server and record failure if known.
+                    IPAddress serverIP = null;
+                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    {
+                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                    }
+                }
             }
 
             // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
@@ -125,20 +147,27 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         public UserPrincipal GetUserBySid(string sid)
         {
             // Loop to re-attempt.
-            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
             {
+                // Get new principal context.
+                var context = this.GetPrincipalContext(attempt);
+
                 try
                 {
-                    // Get new principal context.
-                    var context = this.GetPrincipalContext(attempt);
-
                     // Get user.
                     var userPrincipal = UserPrincipal.FindByIdentity(context, IdentityType.Sid, sid);
 
                     return userPrincipal;
                 }
                 catch (PrincipalServerDownException)
-                { }
+                {
+                    // Determine IP of connected server and record failure if known.
+                    IPAddress serverIP = null;
+                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    {
+                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                    }
+                }
             }
 
             // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
@@ -164,13 +193,13 @@ namespace AdAspNetProvider.ActiveDirectory.Support
             }
 
             // Loop to re-attempt.
-            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
             {
+                // Get new principal context.
+                var context = this.GetPrincipalContext(attempt);
+
                 try
                 {
-                    // Get new principal context.
-                    var context = this.GetPrincipalContext(attempt);
-
                     // Get user principal.
                     var userPrincipal = new UserPrincipal(context);
 
@@ -180,7 +209,14 @@ namespace AdAspNetProvider.ActiveDirectory.Support
                     return this.GetAllPrincipals(userPrincipal, pageIndex, pageSize, sortOrder);
                 }
                 catch (PrincipalServerDownException)
-                { }
+                {
+                    // Determine IP of connected server and record failure if known.
+                    IPAddress serverIP = null;
+                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    {
+                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                    }
+                }
             }
 
             // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
@@ -206,13 +242,13 @@ namespace AdAspNetProvider.ActiveDirectory.Support
             }
 
             // Loop to re-attempt.
-            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
             {
+                // Get new principal context.
+                var context = this.GetPrincipalContext(attempt);
+
                 try
                 {
-                    // Get new principal context.
-                    var context = this.GetPrincipalContext(attempt);
-
                     // Get user principal.
                     var userPrincipal = new UserPrincipal(context);
 
@@ -222,7 +258,14 @@ namespace AdAspNetProvider.ActiveDirectory.Support
                     return this.GetAllPrincipals(userPrincipal, pageIndex, pageSize, sortOrder);
                 }
                 catch (PrincipalServerDownException)
-                { }
+                {
+                    // Determine IP of connected server and record failure if known.
+                    IPAddress serverIP = null;
+                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    {
+                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                    }
+                }
             }
 
             // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
@@ -241,20 +284,27 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         public ICollection<Principal> GetAllUsers(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Loop to re-attempt.
-            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
             {
+                // Get new principal context.
+                var context = this.GetPrincipalContext(attempt);
+
                 try
                 {
-                    // Get new principal context.
-                    var context = this.GetPrincipalContext(attempt);
-
                     // Get user principal.
                     var userPrincipal = new UserPrincipal(context);
 
                     return this.GetAllPrincipals(userPrincipal, pageIndex, pageSize, sortOrder);
                 }
                 catch (PrincipalServerDownException)
-                { }
+                {
+                    // Determine IP of connected server and record failure if known.
+                    IPAddress serverIP = null;
+                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    {
+                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                    }
+                }
             }
 
             // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
@@ -288,20 +338,27 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         public GroupPrincipal GetGroup(string group)
         {
             // Loop to re-attempt.
-            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
             {
+                // Get new principal context.
+                var context = this.GetPrincipalContext(attempt);
+
                 try
                 {
-                    // Get new principal context.
-                    var context = this.GetPrincipalContext(attempt);
-
                     // Get group.
                     var groupPrincipal = GroupPrincipal.FindByIdentity(context, this.Config.IdentityType, group);
 
                     return groupPrincipal;
                 }
                 catch (PrincipalServerDownException)
-                { }
+                {
+                    // Determine IP of connected server and record failure if known.
+                    IPAddress serverIP = null;
+                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    {
+                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                    }
+                }
             }
 
             // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
@@ -320,20 +377,27 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         public ICollection<Principal> GetAllGroups(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Loop to re-attempt.
-            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
             {
+                // Get new principal context.
+                var context = this.GetPrincipalContext(attempt);
+
                 try
                 {
-                    // Get new principal context.
-                    var context = this.GetPrincipalContext(attempt);
-
                     // Get group principal.
                     var groupPrincipal = new GroupPrincipal(context);
 
                     return this.GetAllPrincipals(groupPrincipal, pageIndex, pageSize, sortOrder);
                 }
                 catch (PrincipalServerDownException)
-                { }
+                {
+                    // Determine IP of connected server and record failure if known.
+                    IPAddress serverIP = null;
+                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    {
+                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                    }
+                }
             }
 
             // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
@@ -367,13 +431,13 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         public ICollection<Principal> GetUsersForGroup(string group, bool recursive = true)
         {
             // Loop to re-attempt.
-            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
             {
+                // Get new principal context.
+                var context = this.GetPrincipalContext(attempt);
+
                 try
                 {
-                    // Get new principal context.
-                    var context = this.GetPrincipalContext(attempt);
-
                     // Get group object.
                     var groupPrincipal = GroupPrincipal.FindByIdentity(context, this.Config.IdentityType, group);
 
@@ -398,7 +462,14 @@ namespace AdAspNetProvider.ActiveDirectory.Support
                     return users;
                 }
                 catch (PrincipalServerDownException)
-                { }
+                {
+                    // Determine IP of connected server and record failure if known.
+                    IPAddress serverIP = null;
+                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    {
+                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                    }
+                }
             }
 
             // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
@@ -441,13 +512,13 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         public ICollection<Principal> GetGroupsForUser(string username, bool recursive = true)
         {
             // Loop to re-attempt.
-            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
             {
+                // Get new principal context.
+                var context = this.GetPrincipalContext(attempt);
+
                 try
                 {
-                    // Get new principal context.
-                    var context = this.GetPrincipalContext(attempt);
-
                     // Get user object.
                     var userPrincipal = UserPrincipal.FindByIdentity(context, this.Config.IdentityType, username);
 
@@ -499,7 +570,14 @@ namespace AdAspNetProvider.ActiveDirectory.Support
                     return groups;
                 }
                 catch (PrincipalServerDownException)
-                { }
+                {
+                    // Determine IP of connected server and record failure if known.
+                    IPAddress serverIP = null;
+                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    {
+                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                    }
+                }
             }
 
             // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
@@ -608,36 +686,52 @@ namespace AdAspNetProvider.ActiveDirectory.Support
                 return context;
             }
 
-            // Get server IPs.
-            var serverIPs = Dns.GetIpAddresses(this.Config.Server);
-
-            // Determine which server to try.  If attempt number is specified, work through returned IPs in order.  Otherwise, select random.
-            IPAddress serverIP = null;
-            if (attempt == null)
-            {
-                // Get random number.
-                var random = new Random();
-
-                serverIP = serverIPs[random.Next(serverIPs.Count())];
-            }
-            else
-            {
-                serverIP = serverIPs[attempt.Value % serverIPs.Count()];
-            }
-
             // Create new connection.  Method varies depending on if username and password are specified.
             if (!String.IsNullOrWhiteSpace(this.Config.Username) && !String.IsNullOrWhiteSpace(this.Config.Password))
             {
-                // Username and password specified.
-                context = new PrincipalContext(this.Config.ContextType, serverIP.ToString(), this.Config.Container, this.Config.ContextOptions, this.Config.Username, this.Config.Password);
+                for (int currentAttempt = 0; currentAttempt < (attempt + this.Config.MaxAttempts); currentAttempt++)
+                {
+                    // Get server IP.
+                    var serverIP = this.Dns.GetIpAddress(this.Config.Server, currentAttempt);
 
+                    try
+                    {
+                        // Username and password specified.
+                        context = new PrincipalContext(this.Config.ContextType, serverIP.ToString(), this.Config.Container, this.Config.ContextOptions | ContextOptions.ServerBind, this.Config.Username, this.Config.Password);
+
+                        return context;
+                    }
+                    catch (PrincipalServerDownException)
+                    {
+                        // Record server failure.
+                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                    }
+                }
             }
             else
             {
-                context = new PrincipalContext(this.Config.ContextType, serverIP.ToString(), this.Config.Container, this.Config.ContextOptions);
+                for (int currentAttempt = 0; currentAttempt < (attempt + this.Config.MaxAttempts); currentAttempt++)
+                {
+                    // Get server IP.
+                    var serverIP = this.Dns.GetIpAddress(this.Config.Server, currentAttempt);
+
+                    try
+                    {
+
+                        context = new PrincipalContext(this.Config.ContextType, serverIP.ToString(), this.Config.Container, this.Config.ContextOptions | ContextOptions.ServerBind);
+
+                        return context;
+                    }
+                    catch (PrincipalServerDownException)
+                    {
+                        // Record server failure.
+                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                    }
+                }
             }
 
             return context;
+
         }
         #endregion
     }
