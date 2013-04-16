@@ -161,13 +161,28 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all groups.</returns>
-        public ICollection<string> GetAllGroups(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        public ICollection<Principal> GetAllGroups(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Get principals for all groups.
             var groupPrincipals = this.adService.GetAllGroups(pageIndex, pageSize, sortOrder);
 
             // Process groups for rename, ignore, and allowed.
-            groupPrincipals = this.ProcessRenameIgnoredAllowedGroups(groupPrincipals);
+            groupPrincipals = this.ProcessRenameIgnoredAllowedGroups(groupPrincipals);            
+
+            return groupPrincipals;
+        }
+
+        /// <summary>
+        /// Get all group names.
+        /// </summary>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
+        /// <returns>Collection of all groups.</returns>
+        public ICollection<string> GetAllGroupNames(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        {
+            // Get group principals.
+            var groupPrincipals = this.GetAllGroups(pageIndex, pageSize, sortOrder);
 
             // Process entries.
             var groups = this.GetNamesFromPrincipals(groupPrincipals);
