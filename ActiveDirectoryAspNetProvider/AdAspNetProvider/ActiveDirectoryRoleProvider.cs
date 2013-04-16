@@ -18,6 +18,7 @@ namespace AdAspNetProvider
         private ActiveDirectory.AdConnection adConnect;
         #endregion
 
+        #region Initialization methods
         /// <summary>
         /// Initialize provider.
         /// </summary>
@@ -73,21 +74,7 @@ namespace AdAspNetProvider
                 throw new InvalidOperationException("Cannot change application name.");
             }
         }
-
-        public override void AddUsersToRoles(string[] usernames, string[] roleNames)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void CreateRole(string roleName)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override bool DeleteRole(string roleName, bool throwOnPopulatedRole)
-        {
-            throw new NotImplementedException();
-        }
+        #endregion
 
         /// <summary>
         /// Find users in role.
@@ -104,7 +91,7 @@ namespace AdAspNetProvider
             }
 
             // Get user names.
-            var users = this.adConnect.GetUsersForGroup(roleName);
+            var users = this.adConnect.GetUserNamesForGroup(roleName);
 
             // Find usernames that match.
             var matchingUsers = users.Where(user => user.Contains(usernameToMatch));
@@ -151,7 +138,7 @@ namespace AdAspNetProvider
             }
 
             // Value not found in cache.  Get roles for specified user.
-            roles = this.adConnect.GetGroupsForUser(username, this.Config.RecursiveGroupMembership).ToArray();
+            roles = this.adConnect.GetGroupNamesForUser(username, this.Config.RecursiveGroupMembership).ToArray();
 
             // Store value in cache.
             if (currentContext != null)
@@ -169,7 +156,7 @@ namespace AdAspNetProvider
         /// <returns>List of users</returns>
         public override string[] GetUsersInRole(string roleName)
         {
-            return this.adConnect.GetUsersForGroup(roleName, this.Config.RecursiveGroupMembership).ToArray();
+            return this.adConnect.GetUserNamesForGroup(roleName, this.Config.RecursiveGroupMembership).ToArray();
         }
 
         /// <summary>
@@ -183,11 +170,6 @@ namespace AdAspNetProvider
             return this.adConnect.IsUserInGroup(roleName, username, this.Config.RecursiveGroupMembership);
         }
 
-        public override void RemoveUsersFromRoles(string[] usernames, string[] roleNames)
-        {
-            throw new NotImplementedException();
-        }
-
         /// <summary>
         /// Determine if role exists.
         /// </summary>
@@ -197,5 +179,41 @@ namespace AdAspNetProvider
         {
             return this.adConnect.GroupExists(roleName);
         }
+
+        #region Unsupported methods and properties
+
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
+        public override void RemoveUsersFromRoles(string[] usernames, string[] roleNames)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
+        public override void AddUsersToRoles(string[] usernames, string[] roleNames)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
+        public override void CreateRole(string roleName)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
+        public override bool DeleteRole(string roleName, bool throwOnPopulatedRole)
+        {
+            throw new NotImplementedException();
+        }
+
+        #endregion
     }
 }

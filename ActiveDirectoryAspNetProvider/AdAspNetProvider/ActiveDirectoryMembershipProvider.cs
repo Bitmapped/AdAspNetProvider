@@ -21,6 +21,7 @@ namespace AdAspNetProvider
         private NameValueCollection admpConfig;
         #endregion
 
+        #region Initialization methods
         /// <summary>
         /// Initialize provider.
         /// </summary>
@@ -95,9 +96,10 @@ namespace AdAspNetProvider
                 throw new InvalidOperationException("Cannot change application name.");
             }
         }
+        #endregion
 
         /// <summary>
-        /// Initialized AdConnection.
+        /// Initialize AdConnection.
         /// </summary>
         /// <returns>True if connection has been initialized.</returns>
         private bool InitializeAdConnection()
@@ -161,7 +163,7 @@ namespace AdAspNetProvider
                 }
 
                 // Check if user has any roles.  If so, they can proceed.
-                roles = this.adConnect.GetGroupsForUser(username, this.Config.RecursiveGroupMembership).ToArray();
+                roles = this.adConnect.GetGroupNamesForUser(username, this.Config.RecursiveGroupMembership).ToArray();
 
                 // Store value in cache.
                 if (currentContext != null)
@@ -392,96 +394,153 @@ namespace AdAspNetProvider
 
         #region Unsupported methods and properties
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override bool ChangePassword(string username, string oldPassword, string newPassword)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override bool ChangePasswordQuestionAndAnswer(string username, string password, string newPasswordQuestion, string newPasswordAnswer)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override MembershipUser CreateUser(string username, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override bool DeleteUser(string username, bool deleteAllRelatedData)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override bool EnablePasswordReset
         {
             get { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override bool EnablePasswordRetrieval
         {
             get { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override int GetNumberOfUsersOnline()
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override string GetPassword(string username, string answer)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override int MaxInvalidPasswordAttempts
         {
             get { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override int MinRequiredNonAlphanumericCharacters
         {
             get { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override int MinRequiredPasswordLength
         {
             get { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override int PasswordAttemptWindow
         {
             get { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override MembershipPasswordFormat PasswordFormat
         {
             get { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override string PasswordStrengthRegularExpression
         {
             get { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override bool RequiresQuestionAndAnswer
         {
             get { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override bool RequiresUniqueEmail
         {
             get { throw new NotImplementedException(); }
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override string ResetPassword(string username, string answer)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override bool UnlockUser(string userName)
         {
             throw new NotImplementedException();
         }
 
+        /// <summary>
+        /// Not implemented.
+        /// </summary>
         public override void UpdateUser(MembershipUser user)
         {
             throw new NotImplementedException();
