@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AdAspNetProvider.ActiveDirectory.Support;
+using AdAspNetProvider.ActiveDirectory.Service;
 using System.DirectoryServices.AccountManagement;
 using System.DirectoryServices;
 
 namespace AdAspNetProvider.ActiveDirectory
 {
-    public class AdConnection
+    public class ActiveDirectory
     {
         #region Private variables
-        private AdAspNetProvider.ActiveDirectory.Support.ActiveDirectory adService;
+        private AdAspNetProvider.ActiveDirectory.Service.AdService adService;
         #endregion
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="server">Server to connect to.</param>
         /// <param name="username">Username to use for connection.</param>
         /// <param name="password">Password to use for connection.</param>
-        public AdConnection(string server, string username, string password)
+        public ActiveDirectory(string server, string username, string password)
             : this(new AdConfiguration { Server = server, Username = username, Password = password })
         { }
 
@@ -35,7 +35,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// Create new Active Directory connection.
         /// </summary>
         /// <param name="configuration">Configuration settings to use.</param>
-        public AdConnection(AdConfiguration configuration)
+        public ActiveDirectory(AdConfiguration configuration)
         {
             // Verify a valid configuration object was passed.
             if (configuration == null)
@@ -47,7 +47,7 @@ namespace AdAspNetProvider.ActiveDirectory
             this.Config = configuration;
 
             // Instantiate adService.
-            this.adService = new Support.ActiveDirectory(configuration);
+            this.adService = new Service.AdService(configuration);
         }
         #endregion
 

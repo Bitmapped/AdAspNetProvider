@@ -8,9 +8,9 @@ using System.DirectoryServices.AccountManagement;
 using System.Net;
 using Logging = AdAspNetProvider.Logging;
 
-namespace AdAspNetProvider.ActiveDirectory.Support
+namespace AdAspNetProvider.ActiveDirectory.Service
 {
-    public class ActiveDirectory
+    public class AdService
     {
         /// <summary>
         /// Active Directory configuration settings
@@ -29,7 +29,7 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <param name="server">Server to connect to.</param>
         /// <param name="username">Username to use for connection.</param>
         /// <param name="password">Password to use for connection.</param>
-        public ActiveDirectory(string server, string username, string password)
+        public AdService(string server, string username, string password)
             : this(new AdConfiguration { Server = server, Username = username, Password = password })
         { }
 
@@ -37,7 +37,7 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// Create new Active Directory connection.
         /// </summary>
         /// <param name="configuration">Configuration settings to use.</param>
-        public ActiveDirectory(AdConfiguration configuration)
+        public AdService(AdConfiguration configuration)
         {
             // Verify a valid configuration object was passed.
             if (configuration == null)
