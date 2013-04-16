@@ -10,7 +10,7 @@
     <projectUrl>http://adaspnetprovider.codeplex.com/</projectUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <description>$description$</description>
-    <releaseNotes>Correct handling of provider name.  Use provider name in cache key.</releaseNotes>
+    <releaseNotes>Handle retries better.  Removed use of Microosft's ActiveDirectoryMembershipProvider class.</releaseNotes>
     <copyright>Copyright 2013, $author$</copyright>
     <tags>MembershipProvider RoleProbvider ActiveDirectory ActiveDirectoryRoleProvider ActiveDirectoryMembershipProvicer</tags>
   </metadata>
