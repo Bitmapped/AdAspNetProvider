@@ -15,8 +15,7 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         /// <summary>
         /// Active Directory configuration settings
         /// </summary>
-        public AdConfiguration Config { get; private set; }
-
+        public AdConfiguration Config { get; set; }
 
         #region Constructors
         /// <summary>
@@ -46,8 +45,7 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         }
         #endregion
 
-
-
+        #region Methods for users.
         /// <summary>
         /// Validate that user is authorized.
         /// </summary>
@@ -68,36 +66,6 @@ namespace AdAspNetProvider.ActiveDirectory.Support
                     var validCredentials = context.ValidateCredentials(username, password);
 
                     return validCredentials;
-                }
-                catch (PrincipalServerDownException)
-                { }
-            }
-
-            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
-            var pe = new PrincipalServerDownException(this.Config.Server);
-            Logging.Log.LogError(pe);
-            throw pe;
-        }
-
-        /// <summary>
-        /// Load the listed group.
-        /// </summary>
-        /// <param name="group">Group to load.</param>
-        /// <returns>Object representing group or null if doesn't exist.</returns>
-        public GroupPrincipal GetGroup(string group)
-        {
-            // Loop to re-attempt.
-            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
-            {
-                try
-                {
-                    // Get new principal context.
-                    var context = this.GetPrincipalContext(attempt);
-
-                    // Get group.
-                    var groupPrincipal = GroupPrincipal.FindByIdentity(context, this.Config.IdentityType, group);
-
-                    return groupPrincipal;
                 }
                 catch (PrincipalServerDownException)
                 { }
@@ -296,6 +264,53 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         }
 
         /// <summary>
+        /// Determine if specified user exists.
+        /// </summary>
+        /// <param name="username">Username to test.</param>
+        /// <returns>True/false if user exists.</returns>
+        public bool UserExists(string username)
+        {
+            // Atempt to get user.
+            var userPrincipal = this.GetUser(username);
+
+            // If user is null, does not exist.
+            return (userPrincipal != null);
+        }
+
+        #endregion
+
+        #region Methods for groups
+        /// <summary>
+        /// Load the listed group.
+        /// </summary>
+        /// <param name="group">Group to load.</param>
+        /// <returns>Object representing group or null if doesn't exist.</returns>
+        public GroupPrincipal GetGroup(string group)
+        {
+            // Loop to re-attempt.
+            for (int attempt = 0; attempt < this.Config.MaximumAttempts; attempt++)
+            {
+                try
+                {
+                    // Get new principal context.
+                    var context = this.GetPrincipalContext(attempt);
+
+                    // Get group.
+                    var groupPrincipal = GroupPrincipal.FindByIdentity(context, this.Config.IdentityType, group);
+
+                    return groupPrincipal;
+                }
+                catch (PrincipalServerDownException)
+                { }
+            }
+
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            var pe = new PrincipalServerDownException(this.Config.Server);
+            Logging.Log.LogError(pe);
+            throw pe;
+        }
+
+        /// <summary>
         /// Get all groups.
         /// </summary>
         /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
@@ -328,83 +343,6 @@ namespace AdAspNetProvider.ActiveDirectory.Support
         }
 
         /// <summary>
-        /// Gets all principal objects matching the search principal.
-        /// </summary>
-        /// <param name="searchPrincipal">Principal to use as basis of search.</param>
-        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
-        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
-        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
-        /// <returns>Collection of all matching principals.</returns>
-        private ICollection<Principal> GetAllPrincipals(Principal searchPrincipal, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
-        {
-            // Since parents that call this function are wrapped in retry loops, this function should not be.
-
-            // Get principalSearch for this element.
-            var principalSearcher = new PrincipalSearcher(searchPrincipal);
-
-            // Configure settings for underlying searcher.
-            var underlyingSearcher = (DirectorySearcher)principalSearcher.GetUnderlyingSearcher();
-            underlyingSearcher.PageSize = 0x200;
-            underlyingSearcher.PropertiesToLoad.Add(this.Config.IdentityType.ToString().ToLower());
-
-            if (sortOrder.HasValue)
-            {
-                underlyingSearcher.Sort = new SortOption(sortOrder.Value.ToString().ToLower(), SortDirection.Ascending);
-                underlyingSearcher.PropertiesToLoad.Add(sortOrder.Value.ToString().ToLower());
-            }
-            else
-            {
-                underlyingSearcher.Sort = new SortOption(this.Config.IdentityType.ToString().ToLower(), SortDirection.Ascending);
-            }
-
-            // Get and process results.
-            var principals = new List<Principal>();
-            var principalResults = principalSearcher.FindAll();
-
-            // Calculate begin and end points for results.
-            int startIndex = 0, endIndex = int.MaxValue;
-            if ((pageIndex != null) && (pageSize != null))
-            {
-                startIndex = pageIndex.Value * pageSize.Value;
-                endIndex = (pageIndex.Value + 1) * pageSize.Value;
-            }
-
-            // Use enumerator to loop because of issues with errors on sometimes-returned invalid SIDs.
-            // See: http://social.msdn.microsoft.com/Forums/en/csharpgeneral/thread/9dd81553-3539-4281-addd-3eb75e6e4d5d 
-            var principalEnum = principalResults.GetEnumerator();
-            int currentIndex = 0;
-            while (principalEnum.MoveNext())
-            {
-                if ((startIndex <= currentIndex) && (currentIndex < endIndex))
-                {
-                    Principal newPrincipal = null;
-                    try
-                    {
-                        newPrincipal = principalEnum.Current;
-
-                        if (newPrincipal != null)
-                        {
-                            // Add group object to results.
-                            principals.Add(newPrincipal);
-                        }
-                    }
-                    catch (PrincipalOperationException pe)
-                    {
-                        // Log error.
-                        Logging.Log.LogError(pe);
-
-                        continue;
-                    }
-                }
-
-                // Increment counter.
-                currentIndex++;
-            }
-
-            return principals;
-        }
-
-        /// <summary>
         /// Determine if specified group exists.
         /// </summary>
         /// <param name="group">Group to test.</param>
@@ -417,22 +355,9 @@ namespace AdAspNetProvider.ActiveDirectory.Support
             // If group is null, does not exist.
             return (groupPrincipal != null);
         }
+        #endregion
 
-        /// <summary>
-        /// Determine if specified user exists.
-        /// </summary>
-        /// <param name="username">Username to test.</param>
-        /// <returns>True/false if user exists.</returns>
-        public bool UserExists(string username)
-        {
-            // Atempt to get user.
-            var userPrincipal = this.GetUser(username);
-
-            // If user is null, does not exist.
-            return (userPrincipal != null);
-        }
-
-
+        #region Methods for user-group relationships
         /// <summary>
         /// Get users within a group.
         /// </summary>
@@ -479,7 +404,7 @@ namespace AdAspNetProvider.ActiveDirectory.Support
             // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
             var pe = new PrincipalServerDownException(this.Config.Server);
             Logging.Log.LogError(pe);
-            throw pe;            
+            throw pe;
         }
 
         /// <summary>
@@ -582,10 +507,90 @@ namespace AdAspNetProvider.ActiveDirectory.Support
             Logging.Log.LogError(pe);
             throw pe;
 
-            
-        }
 
-        #region Support methods
+        }
+        #endregion
+
+        #region Support methods for searching with principals
+        /// <summary>
+        /// Gets all principal objects matching the search principal.
+        /// </summary>
+        /// <param name="searchPrincipal">Principal to use as basis of search.</param>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
+        /// <returns>Collection of all matching principals.</returns>
+        private ICollection<Principal> GetAllPrincipals(Principal searchPrincipal, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        {
+            // Since parents that call this function are wrapped in retry loops, this function should not be.
+
+            // Get principalSearch for this element.
+            var principalSearcher = new PrincipalSearcher(searchPrincipal);
+
+            // Configure settings for underlying searcher.
+            var underlyingSearcher = (DirectorySearcher)principalSearcher.GetUnderlyingSearcher();
+            underlyingSearcher.PageSize = 0x200;
+            underlyingSearcher.PropertiesToLoad.Add(this.Config.IdentityType.ToString().ToLower());
+
+            if (sortOrder.HasValue)
+            {
+                underlyingSearcher.Sort = new SortOption(sortOrder.Value.ToString().ToLower(), SortDirection.Ascending);
+                underlyingSearcher.PropertiesToLoad.Add(sortOrder.Value.ToString().ToLower());
+            }
+            else
+            {
+                underlyingSearcher.Sort = new SortOption(this.Config.IdentityType.ToString().ToLower(), SortDirection.Ascending);
+            }
+
+            // Get and process results.
+            var principals = new List<Principal>();
+            var principalResults = principalSearcher.FindAll();
+
+            // Calculate begin and end points for results.
+            int startIndex = 0, endIndex = int.MaxValue;
+            if ((pageIndex != null) && (pageSize != null))
+            {
+                startIndex = pageIndex.Value * pageSize.Value;
+                endIndex = (pageIndex.Value + 1) * pageSize.Value;
+            }
+
+            // Use enumerator to loop because of issues with errors on sometimes-returned invalid SIDs.
+            // See: http://social.msdn.microsoft.com/Forums/en/csharpgeneral/thread/9dd81553-3539-4281-addd-3eb75e6e4d5d 
+            var principalEnum = principalResults.GetEnumerator();
+            int currentIndex = 0;
+            while (principalEnum.MoveNext())
+            {
+                if ((startIndex <= currentIndex) && (currentIndex < endIndex))
+                {
+                    Principal newPrincipal = null;
+                    try
+                    {
+                        newPrincipal = principalEnum.Current;
+
+                        if (newPrincipal != null)
+                        {
+                            // Add group object to results.
+                            principals.Add(newPrincipal);
+                        }
+                    }
+                    catch (PrincipalOperationException pe)
+                    {
+                        // Log error.
+                        Logging.Log.LogError(pe);
+
+                        continue;
+                    }
+                }
+
+                // Increment counter.
+                currentIndex++;
+            }
+
+            return principals;
+        }
+        #endregion
+
+        #region Support methods for accessing Active Directory
         /// <summary>
         /// Gets principal context for accessing Active Direcotry.
         /// </summary>
