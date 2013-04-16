@@ -166,11 +166,11 @@ namespace AdAspNetProvider.ActiveDirectory
             // Get principals for all groups.
             var groupPrincipals = this.adService.GetAllGroups(pageIndex, pageSize, sortOrder);
 
+            // Process groups for rename, ignore, and allowed.
+            groupPrincipals = this.ProcessRenameIgnoredAllowedGroups(groupPrincipals);
+
             // Process entries.
             var groups = this.GetNamesFromPrincipals(groupPrincipals);
-
-            // Process groups for rename, ignore, and allowed.
-            groups = this.ProcessRenameIgnoredAllowedGroups(groups);
 
             return groups;
         }
@@ -237,11 +237,11 @@ namespace AdAspNetProvider.ActiveDirectory
             // Get principals for groups.
             var groupPrincipals = this.adService.GetGroupsForUser(username, recursive);
 
+            // Process groups for rename, ignore, and allowed.
+            groupPrincipals = this.ProcessRenameIgnoredAllowedGroups(groupPrincipals);
+
             // Process entries.
             var groups = this.GetNamesFromPrincipals(groupPrincipals);
-
-            // Process groups for rename, ignore, and allowed.
-            groups = this.ProcessRenameIgnoredAllowedGroups(groups);
 
             return groups;
         }
@@ -313,7 +313,7 @@ namespace AdAspNetProvider.ActiveDirectory
         private string GetRenamedGroup(string renameFrom)
         {
             // If rename list contains renameFrom, get its value.
-            if (this.Config.GroupsToRename.ContainsKey(renameFrom))
+            if (!String.IsNullOrWhiteSpace(renameFrom) && this.Config.GroupsToRename.ContainsKey(renameFrom))
             {
                 return this.Config.GroupsToRename[renameFrom];
             }
@@ -331,7 +331,7 @@ namespace AdAspNetProvider.ActiveDirectory
         private string GetRenamedFromGroup(string renameTo)
         {
             // If rename list contains renameTo, get its key.
-            if (this.Config.GroupsToRename.ContainsValue(renameTo))
+            if (!String.IsNullOrWhiteSpace(renameTo) && this.Config.GroupsToRename.ContainsValue(renameTo))
             {
                 // Try fetching corresponding rename entry.
                 var rename = this.Config.GroupsToRename.FirstOrDefault(x => x.Value == renameTo);
@@ -389,27 +389,36 @@ namespace AdAspNetProvider.ActiveDirectory
         /// </summary>
         /// <param name="originalGroups">Original collection of groups.</param>
         /// <returns>Processed collection of groups.</returns>
-        private ICollection<string> ProcessRenameIgnoredAllowedGroups(ICollection<string> originalGroups)
+        private ICollection<Principal> ProcessRenameIgnoredAllowedGroups(ICollection<Principal> originalGroups)
         {
             // New list of users.
-            var processedGroups = new List<string>();
-
-            // Iterate through list of original users.
-            foreach (var originalGroup in originalGroups)
-            {
-                // Rename user.
-                processedGroups.Add(GetRenamedGroup(originalGroup));
-            }
+            var processedGroups = new List<Principal>();
 
             // Filter for allowed users.
             if (this.Config.AllowedGroups.Any())
             {
-                // List of allowed users specified.  Compare against this list.
-                processedGroups = processedGroups.Intersect(this.Config.AllowedGroups).ToList();
+                // Iterate through list of original users to see if they are allowed.
+                foreach (var originalGroup in originalGroups)
+                {
+                    if (this.Config.AllowedGroups.Contains(GetRenamedGroup(this.GetNameFromPrincipal(originalGroup))))
+                    {
+                        // User on allowed list.  Add to output.
+                        processedGroups.Add(originalGroup);
+                    }
+                }
             }
-
-            // Exclude ignored users.
-            processedGroups = processedGroups.Except(this.Config.GroupsToIgnore).ToList();
+            else
+            {
+                // Iterate through list of original users to see if they are to be ignored.
+                foreach (var originalGroup in originalGroups)
+                {
+                    if (this.Config.GroupsToIgnore.Contains(GetRenamedGroup(this.GetNameFromPrincipal(originalGroup))) == false)
+                    {
+                        // User not on ignore list.  Add to output.
+                        processedGroups.Add(originalGroup);
+                    }
+                }
+            }
 
             return processedGroups;
         }
