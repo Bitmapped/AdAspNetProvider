@@ -97,6 +97,12 @@ namespace AdAspNetProvider
         /// <returns>Users in role matching name.</returns>
         public override string[] FindUsersInRole(string roleName, string usernameToMatch)
         {
+            // Verify that search methods are allowed.
+            if (this.Config.EnableSearchMethods == false)
+            {
+                throw new NotSupportedException("Search methods are not enabled.");
+            }
+
             // Get user names.
             var users = this.adConnect.GetUsersForGroup(roleName);
 
@@ -118,7 +124,7 @@ namespace AdAspNetProvider
                 throw new NotSupportedException("Search methods are not enabled.");
             }
 
-            return this.adConnect.GetAllGroups().ToArray();
+            return this.adConnect.GetAllGroupNames().ToArray();
         }
 
         /// <summary>

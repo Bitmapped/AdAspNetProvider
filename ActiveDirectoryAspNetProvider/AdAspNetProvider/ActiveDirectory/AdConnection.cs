@@ -197,13 +197,28 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all users.</returns>
-        public ICollection<string> GetAllUsers(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        public ICollection<Principal> GetAllUsers(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Get principals for all users.
             var userPrincipals = this.adService.GetAllUsers(pageIndex, pageSize, sortOrder);
 
             // Process users for ignore and allowed.
             userPrincipals = this.ProcessIgnoredAllowedUsers(userPrincipals);
+
+            return userPrincipals;
+        }
+
+        /// <summary>
+        /// Get all user names.
+        /// </summary>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
+        /// <returns>Collection of all users.</returns>
+        public ICollection<string> GetAllUserNames(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        {
+            // Process entries.
+            var userPrincipals = this.GetAllUsers(pageIndex, pageSize, sortOrder);
 
             // Process entries.
             var users = this.GetNamesFromPrincipals(userPrincipals);
