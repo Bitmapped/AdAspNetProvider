@@ -67,7 +67,7 @@
     <Compile Include="ProviderConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="AdAspNetProvider.nuspec" />
+    <None Include="AdAspNetProvider.sample.nupkg" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
