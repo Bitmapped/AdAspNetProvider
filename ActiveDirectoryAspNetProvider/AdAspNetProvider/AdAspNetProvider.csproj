@@ -67,11 +67,14 @@
     <Compile Include="ProviderConfiguration.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="AdAspNetProvider.sample.nupkg" />
     <None Include="packages.config" />
+    <None Include="Packages\NuGet\AdAspNetProvider.4.0.2.nupkg" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="App_Readme\Elmah.txt" />
+    <Content Include="Packages\Umbraco\package.xml" />
+    <Content Include="Packages\Umbraco\readme.txt" />
+    <Content Include="Packages\Umbraco\screenshot.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
