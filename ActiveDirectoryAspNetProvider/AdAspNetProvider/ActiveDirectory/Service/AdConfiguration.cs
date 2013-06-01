@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.DirectoryServices.AccountManagement;
+﻿using System.DirectoryServices.AccountManagement;
 
 namespace AdAspNetProvider.ActiveDirectory.Service
 {
     public class AdConfiguration
     {
+        #region Constructor
         /// <summary>
         /// Constructor to define default values.
         /// </summary>
@@ -32,7 +28,9 @@ namespace AdAspNetProvider.ActiveDirectory.Service
             // Specify default cache duration in minutes.
             this.CacheDurationInMinutes = 30;
         }
+        #endregion
 
+        #region Properties
         /// <summary>
         /// Context type for connection.
         /// </summary>
@@ -88,6 +86,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// </summary>
         [System.ComponentModel.DefaultValue(30)]
         public int CacheDurationInMinutes { get; set; }
+        #endregion
 
         /// <summary>
         /// Method to implement ICloneable, duplicate this object.

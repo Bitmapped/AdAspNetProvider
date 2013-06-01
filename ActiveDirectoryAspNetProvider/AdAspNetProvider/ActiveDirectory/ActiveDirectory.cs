@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AdAspNetProvider.ActiveDirectory.Service;
-using System.DirectoryServices.AccountManagement;
 using System.DirectoryServices;
+using System.DirectoryServices.AccountManagement;
+using System.Linq;
 
 namespace AdAspNetProvider.ActiveDirectory
 {
@@ -439,18 +436,21 @@ namespace AdAspNetProvider.ActiveDirectory
         private string GetRenamedFromGroup(string renameTo)
         {
             // If rename list contains renameTo, get its key.
-            if (!String.IsNullOrWhiteSpace(renameTo) && this.Config.GroupsToRename.ContainsValue(renameTo))
+            if (!String.IsNullOrWhiteSpace(renameTo))
             {
                 // Try fetching corresponding rename entry.
-                var rename = this.Config.GroupsToRename.FirstOrDefault(x => x.Value == renameTo);
+                var rename = this.Config.GroupsToRename.Where(x => x.Value == renameTo);
 
-                return rename.Key;
+                // If a name was returned, use it.
+                if (rename.Any())
+                {
+                    return rename.First().Key;
+                }
             }
-            else
-            {
-                // Rename did not exist.  Return original name.
-                return renameTo;
-            }
+
+            // Rename did not exist.  Return original name.
+            return renameTo;
+
         }
         #endregion
 
