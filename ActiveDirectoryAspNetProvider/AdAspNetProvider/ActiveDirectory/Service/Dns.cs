@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Net;
-using System.Net.Sockets;
 
 namespace AdAspNetProvider.ActiveDirectory.Service
 {
@@ -17,22 +14,24 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         public Dns(AdConfiguration config)
         {
             // Initialize DnsCache.
-            this.DnsCache = new Dictionary<string, DnsCache>();
+            this.DnsCache = new ConcurrentDictionary<string, DnsCache>();
 
             // Store configuration.
             this.Config = config;
         }
         #endregion
 
+        #region Properties
         /// <summary>
         /// Cache for storing Dns entries.
         /// </summary>
-        private Dictionary<string, DnsCache> DnsCache { get; set; }
+        private ConcurrentDictionary<string, DnsCache> DnsCache { get; set; }
 
         /// <summary>
         /// Stores configuration settings.
         /// </summary>
         private AdConfiguration Config { get; set; }
+        #endregion
 
         /// <summary>
         /// Get IP addresses for the specified DNS host or IP address.
@@ -42,10 +41,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         public IPAddress[] GetIpAddresses(string host)
         {
             // Load DNS entries into cache if needed.
-            if (!this.DnsCache.ContainsKey(host))
-            {
-                this.DnsCache.Add(host, new DnsCache(host, this.Config));
-            }
+            this.DnsCache.TryAdd(host, new DnsCache(host, this.Config));
 
             // Get Ip addresses from cache.
             return this.DnsCache[host].GetIpAddresses();

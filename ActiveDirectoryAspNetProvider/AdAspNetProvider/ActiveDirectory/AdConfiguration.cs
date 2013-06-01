@@ -1,13 +1,11 @@
-﻿using System;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace AdAspNetProvider.ActiveDirectory
 {
     public class AdConfiguration : AdAspNetProvider.ActiveDirectory.Service.AdConfiguration
     {
+        #region Constructor
         /// <summary>
         /// Constructor to define default values.
         /// </summary>
@@ -31,12 +29,14 @@ namespace AdAspNetProvider.ActiveDirectory
             // Initialize containers.
             this.AllowedUsers = new List<string>();
             this.AllowedGroups = new List<string>();
-            this.GroupsToRename = new Dictionary<string, string>();
+            this.GroupsToRename = new ConcurrentDictionary<string, string>();
 
             // Search recursively by default.
             this.RecursiveGroupMembership = true;
         }
+        #endregion
 
+        #region Properties
         /// <summary>
         /// Users to ignore in results.
         /// </summary>
@@ -71,13 +71,13 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <summary>
         /// Groups to be renamed with oldname, newname.
         /// </summary>
-        public Dictionary<string, string> GroupsToRename { get; set; }
+        public ConcurrentDictionary<string, string> GroupsToRename { get; set; }
 
         /// <summary>
         /// Use recursive membership
         /// </summary>
         [System.ComponentModel.DefaultValue(true)]
         public bool RecursiveGroupMembership { get; set; }
-
+        #endregion
     }
 }

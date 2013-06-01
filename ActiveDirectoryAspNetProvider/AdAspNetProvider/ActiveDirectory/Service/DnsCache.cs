@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Linq;
-using System.Text;
 using System.Net;
 
 namespace AdAspNetProvider.ActiveDirectory.Service
@@ -41,7 +40,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <summary>
         /// Access items in cache.
         /// </summary>
-        private Dictionary<IPAddress, DnsCacheItem> CacheItems { get; set; }
+        private ConcurrentDictionary<IPAddress, DnsCacheItem> CacheItems { get; set; }
 
         /// <summary>
         /// Hostname associated with these cache entries.
@@ -65,7 +64,8 @@ namespace AdAspNetProvider.ActiveDirectory.Service
             // If fail count has reached limit, remove entry.
             if (this.CacheItems[serverIP].FailCount >= this.Config.MaxServerFailures)
             {
-                this.CacheItems.Remove(serverIP);
+                DnsCacheItem failedCache;
+                this.CacheItems.TryRemove(serverIP, out failedCache);
             }
         }
 
@@ -100,7 +100,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
             this.CacheLastRefresh = DateTime.Now;
 
             // Initialize cache.
-            this.CacheItems = new Dictionary<IPAddress, DnsCacheItem>();
+            this.CacheItems = new ConcurrentDictionary<IPAddress, DnsCacheItem>();
 
             // Perform Dns lookup.
             var serverIPs = System.Net.Dns.GetHostAddresses(this.Hostname);
@@ -108,7 +108,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
             // Store each server IP.
             foreach (var serverIP in serverIPs)
             {
-                this.CacheItems.Add(serverIP, new DnsCacheItem(serverIP));
+                this.CacheItems.TryAdd(serverIP, new DnsCacheItem(serverIP));
             }
 
             // If cache is empty, throw error.

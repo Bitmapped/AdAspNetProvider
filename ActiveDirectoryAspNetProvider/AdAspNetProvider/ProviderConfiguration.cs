@@ -1,18 +1,20 @@
-﻿using System;
+﻿using AdAspNetProvider.ActiveDirectory;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Configuration;
+using System.Configuration.Provider;
+using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AdAspNetProvider.ActiveDirectory;
-using System.Collections.Specialized;
-using System.Configuration.Provider;
-using System.Configuration;
-using System.DirectoryServices.AccountManagement;
 
 namespace AdAspNetProvider
 {
     public class ProviderConfiguration : AdAspNetProvider.ActiveDirectory.AdConfiguration
     {
+        #region Constructor
         /// <summary>
         /// Constructor, processes input configuration parameters
         /// </summary>
@@ -141,7 +143,7 @@ namespace AdAspNetProvider
                     {
                         if (!String.IsNullOrWhiteSpace(rolesToRenameFrom[i]) && !String.IsNullOrWhiteSpace(rolesToRenameTo[i]))
                         {
-                            this.GroupsToRename.Add(rolesToRenameFrom[i], rolesToRenameTo[i]);
+                            this.GroupsToRename.TryAdd(rolesToRenameFrom[i], rolesToRenameTo[i]);
                         }
                     }
                     catch (ArgumentException ex)
@@ -226,7 +228,9 @@ namespace AdAspNetProvider
                 this.IgnoreDefaultUsers = false;
             }
         }
+        #endregion
 
+        #region Properties
         /// <summary>
         /// Application name
         /// </summary>
@@ -264,6 +268,6 @@ namespace AdAspNetProvider
         /// </summary>
         [System.ComponentModel.DefaultValue(false)]
         public bool EnableSearchMethods { get; set; }
-
+        #endregion
     }
 }
