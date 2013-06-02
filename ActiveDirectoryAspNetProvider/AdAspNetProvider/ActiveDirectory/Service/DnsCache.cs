@@ -48,24 +48,32 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         private string Hostname { get; set; }
         #endregion
 
+        #region Variables
+        private Object lockCacheItems = new Object();
+        #endregion
+
         /// <summary>
         /// Record failure on a server IP.
         /// </summary>
         /// <param name="serverIP">Server IP that experienced failure.</param>
         public void RecordFailure(IPAddress serverIP)
         {
-            // Check to see if this cache item exists.
-            if (this.CacheItems.ContainsKey(serverIP))
+            // Lock cache items to avoid problems with deletes.
+            lock (this.lockCacheItems)
             {
-                // Increment failure.
-                this.CacheItems[serverIP].FailCount++;
-            }
+                // Check to see if item still exists in cache.
+                if (this.CacheItems.ContainsKey(serverIP))
+                {
+                    // Increment failure.
+                    this.CacheItems[serverIP].FailCount++;
 
-            // If fail count has reached limit, remove entry.
-            if (this.CacheItems[serverIP].FailCount >= this.Config.MaxServerFailures)
-            {
-                DnsCacheItem failedCache;
-                this.CacheItems.TryRemove(serverIP, out failedCache);
+                    // If fail count has reached limit, remove entry.
+                    if (this.CacheItems[serverIP].FailCount >= this.Config.MaxServerFailures)
+                    {
+                        DnsCacheItem failedCache;
+                        this.CacheItems.TryRemove(serverIP, out failedCache);
+                    }
+                }
             }
         }
 
