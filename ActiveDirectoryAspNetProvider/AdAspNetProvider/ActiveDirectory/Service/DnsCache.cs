@@ -58,21 +58,18 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <param name="serverIP">Server IP that experienced failure.</param>
         public void RecordFailure(IPAddress serverIP)
         {
-            // Lock cache items to avoid problems with deletes.
-            lock (this.lockCacheItems)
+            // Get cache item.
+            DnsCacheItem cacheItem;
+            if (this.CacheItems.TryGetValue(serverIP, out cacheItem))
             {
-                // Check to see if item still exists in cache.
-                if (this.CacheItems.ContainsKey(serverIP))
-                {
-                    // Increment failure.
-                    this.CacheItems[serverIP].FailCount++;
+                // Increment failure.
+                cacheItem.FailCount++;
 
-                    // If fail count has reached limit, remove entry.
-                    if (this.CacheItems[serverIP].FailCount >= this.Config.MaxServerFailures)
-                    {
-                        DnsCacheItem failedCache;
-                        this.CacheItems.TryRemove(serverIP, out failedCache);
-                    }
+                // If maximum number of failures has been reached, remove entry.
+                if (cacheItem.FailCount >= this.Config.MaxServerFailures)
+                {
+                    DnsCacheItem failedCache;
+                    this.CacheItems.TryRemove(serverIP, out failedCache);
                 }
             }
         }
