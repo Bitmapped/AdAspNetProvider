@@ -68,8 +68,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                 // If maximum number of failures has been reached, remove entry.
                 if (cacheItem.FailCount >= this.Config.MaxServerFailures)
                 {
-                    DnsCacheItem failedCache;
-                    this.CacheItems.TryRemove(serverIP, out failedCache);
+                    this.CacheItems.TryRemove(serverIP, out cacheItem);
                 }
             }
         }

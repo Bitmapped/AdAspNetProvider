@@ -40,11 +40,14 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <returns>IP addresses for host.</returns>
         public IPAddress[] GetIpAddresses(string host)
         {
+            // Create new cache entry for this host.
+            var hostCache = new DnsCache(host, this.Config);
+
             // Load DNS entries into cache if needed.
-            this.DnsCache.TryAdd(host, new DnsCache(host, this.Config));
+            hostCache = this.DnsCache.GetOrAdd(host, hostCache);
 
             // Get Ip addresses from cache.
-            return this.DnsCache[host].GetIpAddresses();
+            return hostCache.GetIpAddresses();
         }
 
         /// <summary>
@@ -82,11 +85,13 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <param name="serverIP">IP address that failed.</param>
         public void RecordFailure(string host, IPAddress serverIP)
         {
-            // Ensure host is valid.
-            if (this.DnsCache.ContainsKey(host))
+            // Get host cache entry.
+            DnsCache hostCache;
+
+            // If host exists in cache, record failure.
+            if (this.DnsCache.TryGetValue(host, out hostCache))
             {
-                // Record failure on host.
-                this.DnsCache[host].RecordFailure(serverIP);
+                hostCache.RecordFailure(serverIP);
             }
         }
     }
