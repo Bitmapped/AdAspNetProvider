@@ -7,6 +7,7 @@ using System.Configuration;
 using System.Configuration.Provider;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -226,6 +227,12 @@ namespace AdAspNetProvider
             else
             {
                 this.IgnoreDefaultUsers = false;
+            }
+
+            // Process ignore server IPs.
+            if (!String.IsNullOrWhiteSpace(config["ignoreServerIpAddresses"]))
+            {
+                this.IgnoreServerIpAddresses.AddRange(config["ignoreServerIpAddresses"].Split(',').Select(ip => IPAddress.Parse(ip.Trim())));
             }
         }
         #endregion
