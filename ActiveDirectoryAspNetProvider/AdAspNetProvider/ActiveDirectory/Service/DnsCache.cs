@@ -21,8 +21,8 @@ namespace AdAspNetProvider.ActiveDirectory.Service
             // Store configuration.
             this.Config = config;
 
-            // Populate cache.
-            this.PopulateCache();            
+            // Initialize cache.  It is not populated until Dns lookup is actually performed.
+            this.CacheItems = new ConcurrentDictionary<IPAddress, DnsCacheItem>();        
         }
         #endregion
 
@@ -101,13 +101,13 @@ namespace AdAspNetProvider.ActiveDirectory.Service
             }
 
             // Store time of last refresh.
-            this.CacheLastRefresh = DateTime.Now;
-
-            // Initialize cache.
-            this.CacheItems = new ConcurrentDictionary<IPAddress, DnsCacheItem>();
+            this.CacheLastRefresh = DateTime.Now;            
 
             // Perform Dns lookup.
             var serverIPs = System.Net.Dns.GetHostAddresses(this.Hostname);
+
+            // Filter out ignored server IP addresses.
+            serverIPs = serverIPs.Except(this.Config.IgnoreServerIpAddresses).ToArray();
 
             // Store each server IP.
             foreach (var serverIP in serverIPs)
@@ -132,9 +132,6 @@ namespace AdAspNetProvider.ActiveDirectory.Service
             {
                 // Cache is too old.  Refresh it.
                 this.PopulateCache();
-
-                // Update refresh timestamp.
-                this.CacheLastRefresh = DateTime.Now;
             }
         }
         #endregion

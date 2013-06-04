@@ -365,6 +365,12 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <returns>Collection of names.</returns>
         public ICollection<string> GetNamesFromPrincipals(ICollection<Principal> principals)
         {
+            // If there are no principals, return empty list.
+            if (principals == null)
+            {
+                return new List<string>();
+            }
+
             // Collection of names.
             var names = new List<string>();
 
@@ -462,6 +468,12 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <returns>Processed collection of users.</returns>
         private ICollection<Principal> ProcessIgnoredAllowedUsers(ICollection<Principal> originalUsers)
         {
+            // If there are no originalUsers, return empty list.
+            if (originalUsers == null)
+            {
+                return new List<Principal>();
+            }
+
             // New list of users.
             var processedUsers = new List<Principal>();
 
@@ -501,6 +513,12 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <returns>Processed collection of groups.</returns>
         private ICollection<Principal> ProcessIgnoreAllowedGroups(ICollection<Principal> originalGroups)
         {
+            // If there are no originalGroups, return empty list.
+            if (originalGroups == null)
+            {
+                return new List<Principal>();
+            }
+
             // New list of users.
             var processedGroups = new List<Principal>();
 

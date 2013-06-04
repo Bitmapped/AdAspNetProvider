@@ -1,4 +1,6 @@
-﻿using System.DirectoryServices.AccountManagement;
+﻿using System.Collections.Generic;
+using System.DirectoryServices.AccountManagement;
+using System.Net;
 
 namespace AdAspNetProvider.ActiveDirectory.Service
 {
@@ -27,6 +29,9 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
             // Specify default cache duration in minutes.
             this.CacheDurationInMinutes = 30;
+
+            // Default to empty list.
+            this.IgnoreServerIpAddresses = new List<IPAddress>();
         }
         #endregion
 
@@ -86,6 +91,12 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// </summary>
         [System.ComponentModel.DefaultValue(30)]
         public int CacheDurationInMinutes { get; set; }
+
+        /// <summary>
+        /// Server IPs to ignore if returned by DNS
+        /// </summary>
+        public List<IPAddress> IgnoreServerIpAddresses { get; set; }
+
         #endregion
 
         /// <summary>
