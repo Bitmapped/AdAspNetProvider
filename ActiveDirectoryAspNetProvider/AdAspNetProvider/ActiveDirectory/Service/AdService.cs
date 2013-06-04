@@ -441,10 +441,10 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                     // Get group object.
                     var groupPrincipal = GroupPrincipal.FindByIdentity(context, this.Config.IdentityType, group);
 
-                    // If group doesn't exist, return null.
+                    // If group doesn't exist, return empty list.
                     if (groupPrincipal == null)
                     {
-                        return null;
+                        return new List<Principal>();
                     }
 
                     // Get and process results.
@@ -522,10 +522,10 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                     // Get user object.
                     var userPrincipal = UserPrincipal.FindByIdentity(context, this.Config.IdentityType, username);
 
-                    // If user doesn't exist, return null.
+                    // If user doesn't exist, return empty list.
                     if (userPrincipal == null)
                     {
-                        return null;
+                        return new List<Principal>();
                     }
 
                     // Get and process results.
