@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
+using System.DirectoryServices.ActiveDirectory;
 using System.Net;
 using Logging = AdAspNetProvider.Logging;
 
@@ -75,13 +76,21 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
                     return validCredentials;
                 }
-                catch (PrincipalServerDownException)
+                catch (Exception ex)
                 {
-                    // Determine IP of connected server and record failure if known.
-                    IPAddress serverIP = null;
-                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    // If it is a server down exception, catch it.  Otherwise, rethrow.
+                    if (ex is PrincipalServerDownException || ex is ActiveDirectoryServerDownException)
                     {
-                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        // Determine IP of connected server and record failure if known.
+                        IPAddress serverIP = null;
+                        if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                        {
+                            this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        }
+                    }
+                    else
+                    {
+                        throw;
                     }
                 }
             }
@@ -112,13 +121,21 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
                     return userPrincipal;
                 }
-                catch (PrincipalServerDownException)
+                catch (Exception ex)
                 {
-                    // Determine IP of connected server and record failure if known.
-                    IPAddress serverIP = null;
-                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    // If it is a server down exception, catch it.  Otherwise, rethrow.
+                    if (ex is PrincipalServerDownException || ex is ActiveDirectoryServerDownException)
                     {
-                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        // Determine IP of connected server and record failure if known.
+                        IPAddress serverIP = null;
+                        if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                        {
+                            this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        }
+                    }
+                    else
+                    {
+                        throw;
                     }
                 }
             }
@@ -159,13 +176,21 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
                     return userPrincipal;
                 }
-                catch (PrincipalServerDownException)
+                catch (Exception ex)
                 {
-                    // Determine IP of connected server and record failure if known.
-                    IPAddress serverIP = null;
-                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    // If it is a server down exception, catch it.  Otherwise, rethrow.
+                    if (ex is PrincipalServerDownException || ex is ActiveDirectoryServerDownException)
                     {
-                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        // Determine IP of connected server and record failure if known.
+                        IPAddress serverIP = null;
+                        if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                        {
+                            this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        }
+                    }
+                    else
+                    {
+                        throw;
                     }
                 }
             }
@@ -208,13 +233,21 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
                     return this.GetAllPrincipals(userPrincipal, pageIndex, pageSize, sortOrder);
                 }
-                catch (PrincipalServerDownException)
+                catch (Exception ex)
                 {
-                    // Determine IP of connected server and record failure if known.
-                    IPAddress serverIP = null;
-                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    // If it is a server down exception, catch it.  Otherwise, rethrow.
+                    if (ex is PrincipalServerDownException || ex is ActiveDirectoryServerDownException)
                     {
-                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        // Determine IP of connected server and record failure if known.
+                        IPAddress serverIP = null;
+                        if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                        {
+                            this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        }
+                    }
+                    else
+                    {
+                        throw;
                     }
                 }
             }
@@ -257,13 +290,21 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
                     return this.GetAllPrincipals(userPrincipal, pageIndex, pageSize, sortOrder);
                 }
-                catch (PrincipalServerDownException)
+                catch (Exception ex)
                 {
-                    // Determine IP of connected server and record failure if known.
-                    IPAddress serverIP = null;
-                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    // If it is a server down exception, catch it.  Otherwise, rethrow.
+                    if (ex is PrincipalServerDownException || ex is ActiveDirectoryServerDownException)
                     {
-                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        // Determine IP of connected server and record failure if known.
+                        IPAddress serverIP = null;
+                        if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                        {
+                            this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        }
+                    }
+                    else
+                    {
+                        throw;
                     }
                 }
             }
@@ -296,13 +337,21 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
                     return this.GetAllPrincipals(userPrincipal, pageIndex, pageSize, sortOrder);
                 }
-                catch (PrincipalServerDownException)
+                catch (Exception ex)
                 {
-                    // Determine IP of connected server and record failure if known.
-                    IPAddress serverIP = null;
-                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    // If it is a server down exception, catch it.  Otherwise, rethrow.
+                    if (ex is PrincipalServerDownException || ex is ActiveDirectoryServerDownException)
                     {
-                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        // Determine IP of connected server and record failure if known.
+                        IPAddress serverIP = null;
+                        if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                        {
+                            this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        }
+                    }
+                    else
+                    {
+                        throw;
                     }
                 }
             }
@@ -350,13 +399,21 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
                     return groupPrincipal;
                 }
-                catch (PrincipalServerDownException)
+                catch (Exception ex)
                 {
-                    // Determine IP of connected server and record failure if known.
-                    IPAddress serverIP = null;
-                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    // If it is a server down exception, catch it.  Otherwise, rethrow.
+                    if (ex is PrincipalServerDownException || ex is ActiveDirectoryServerDownException)
                     {
-                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        // Determine IP of connected server and record failure if known.
+                        IPAddress serverIP = null;
+                        if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                        {
+                            this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        }
+                    }
+                    else
+                    {
+                        throw;
                     }
                 }
             }
@@ -389,13 +446,21 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
                     return this.GetAllPrincipals(groupPrincipal, pageIndex, pageSize, sortOrder);
                 }
-                catch (PrincipalServerDownException)
+                catch (Exception ex)
                 {
-                    // Determine IP of connected server and record failure if known.
-                    IPAddress serverIP = null;
-                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    // If it is a server down exception, catch it.  Otherwise, rethrow.
+                    if (ex is PrincipalServerDownException || ex is ActiveDirectoryServerDownException)
                     {
-                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        // Determine IP of connected server and record failure if known.
+                        IPAddress serverIP = null;
+                        if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                        {
+                            this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        }
+                    }
+                    else
+                    {
+                        throw;
                     }
                 }
             }
@@ -461,13 +526,21 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
                     return users;
                 }
-                catch (PrincipalServerDownException)
+                catch (Exception ex)
                 {
-                    // Determine IP of connected server and record failure if known.
-                    IPAddress serverIP = null;
-                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    // If it is a server down exception, catch it.  Otherwise, rethrow.
+                    if (ex is PrincipalServerDownException || ex is ActiveDirectoryServerDownException)
                     {
-                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        // Determine IP of connected server and record failure if known.
+                        IPAddress serverIP = null;
+                        if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                        {
+                            this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        }
+                    }
+                    else
+                    {
+                        throw;
                     }
                 }
             }
@@ -569,13 +642,21 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
                     return groups;
                 }
-                catch (PrincipalServerDownException)
+                catch (Exception ex)
                 {
-                    // Determine IP of connected server and record failure if known.
-                    IPAddress serverIP = null;
-                    if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                    // If it is a server down exception, catch it.  Otherwise, rethrow.
+                    if (ex is PrincipalServerDownException || ex is ActiveDirectoryServerDownException)
                     {
-                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        // Determine IP of connected server and record failure if known.
+                        IPAddress serverIP = null;
+                        if (IPAddress.TryParse(context.ConnectedServer, out serverIP))
+                        {
+                            this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        }
+                    }
+                    else
+                    {
+                        throw;
                     }
                 }
             }
@@ -701,10 +782,18 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
                         return context;
                     }
-                    catch (PrincipalServerDownException)
+                    catch (Exception ex)
                     {
-                        // Record server failure.
-                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        // If it is a server down exception, catch it.  Otherwise, rethrow.
+                        if (ex is PrincipalServerDownException || ex is ActiveDirectoryServerDownException)
+                        {
+                            // Determine IP of connected server and record failure if known.
+                            this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
                 }
             }
@@ -722,10 +811,18 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
                         return context;
                     }
-                    catch (PrincipalServerDownException)
+                    catch (Exception ex)
                     {
-                        // Record server failure.
-                        this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        // If it is a server down exception, catch it.  Otherwise, rethrow.
+                        if (ex is PrincipalServerDownException || ex is ActiveDirectoryServerDownException)
+                        {
+                            // Record server failure.
+                            this.Dns.RecordFailure(this.Config.Server, serverIP);
+                        }
+                        else
+                        {
+                            throw;
+                        }
                     }
                 }
             }
