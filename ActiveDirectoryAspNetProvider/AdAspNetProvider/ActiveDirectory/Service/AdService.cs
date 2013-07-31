@@ -787,7 +787,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                         // If it is a server down exception, catch it.  Otherwise, rethrow.
                         if (ex is PrincipalServerDownException || ex is ActiveDirectoryServerDownException)
                         {
-                            // Determine IP of connected server and record failure if known.
+                            // Record server failure.
                             this.Dns.RecordFailure(this.Config.Server, serverIP);
                         }
                         else
