@@ -187,7 +187,13 @@ namespace AdAspNetProvider
         /// </summary>
         public override void RemoveUsersFromRoles(string[] usernames, string[] roleNames)
         {
-            throw new NotImplementedException();
+            // If silently ignoring not supported methods/properties, return that action was completed.
+            if (this.Config.SilentlyIgnoreNotSupported)
+            {
+                return;
+            }
+
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -195,7 +201,13 @@ namespace AdAspNetProvider
         /// </summary>
         public override void AddUsersToRoles(string[] usernames, string[] roleNames)
         {
-            throw new NotImplementedException();
+            // If silently ignoring not supported methods/properties, return that action was completed.
+            if (this.Config.SilentlyIgnoreNotSupported)
+            {
+                return;
+            }
+
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -203,7 +215,13 @@ namespace AdAspNetProvider
         /// </summary>
         public override void CreateRole(string roleName)
         {
-            throw new NotImplementedException();
+            // If silently ignoring not supported methods/properties, return that action was completed.
+            if (this.Config.SilentlyIgnoreNotSupported)
+            {
+                return;
+            }
+
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -211,7 +229,13 @@ namespace AdAspNetProvider
         /// </summary>
         public override bool DeleteRole(string roleName, bool throwOnPopulatedRole)
         {
-            throw new NotImplementedException();
+            // If silently ignoring not supported methods/properties, return that action was completed.
+            if (this.Config.SilentlyIgnoreNotSupported)
+            {
+                return true;
+            }
+
+            throw new NotSupportedException();
         }
 
         #endregion

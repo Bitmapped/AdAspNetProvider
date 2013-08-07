@@ -234,6 +234,16 @@ namespace AdAspNetProvider
             {
                 this.IgnoreServerIpAddresses.AddRange(config["ignoreServerIpAddresses"].Split(',').Select(ip => IPAddress.Parse(ip.Trim())));
             }
+
+            // Process silently ignoring not supported methods and properties.
+            if (!string.IsNullOrWhiteSpace(config["silentlyIgnoreNotSupported"]) && (config["silentlyIgnoreNotSupported"].ToLower() == "true"))
+            {
+                this.SilentlyIgnoreNotSupported = true;
+            }
+            else
+            {
+                this.IgnoreDefaultUsers = false;
+            }
         }
         #endregion
 
@@ -275,6 +285,12 @@ namespace AdAspNetProvider
         /// </summary>
         [System.ComponentModel.DefaultValue(false)]
         public bool EnableSearchMethods { get; set; }
+
+        /// <summary>
+        /// Silently ignore or return generic values for not-implemented AD methods rather than throwing an exception.
+        /// </summary>
+        [System.ComponentModel.DefaultValue(false)]
+        public bool SilentlyIgnoreNotSupported { get; set; }
         #endregion
     }
 }

@@ -274,7 +274,7 @@ namespace AdAspNetProvider
 
             // Get users.
             var users = this.adConnect.GetAllUsers(pageIndex, pageSize);
- 
+
             // Process users to create collection.
             var collection = new MembershipUserCollection();
             foreach (UserPrincipal user in users)
@@ -410,7 +410,13 @@ namespace AdAspNetProvider
         /// </summary>
         public override bool ChangePassword(string username, string oldPassword, string newPassword)
         {
-            throw new NotImplementedException();
+            // If silently ignoring not supported methods/properties, return that action was completed.
+            if (this.Config.SilentlyIgnoreNotSupported)
+            {
+                return true;
+            }
+
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -418,7 +424,13 @@ namespace AdAspNetProvider
         /// </summary>
         public override bool ChangePasswordQuestionAndAnswer(string username, string password, string newPasswordQuestion, string newPasswordAnswer)
         {
-            throw new NotImplementedException();
+            // If silently ignoring not supported methods/properties, return default value.
+            if (this.Config.SilentlyIgnoreNotSupported)
+            {
+                return true;
+            }
+
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -426,7 +438,29 @@ namespace AdAspNetProvider
         /// </summary>
         public override MembershipUser CreateUser(string username, string password, string email, string passwordQuestion, string passwordAnswer, bool isApproved, object providerUserKey, out MembershipCreateStatus status)
         {
-            throw new NotImplementedException();
+            // If silently ignoring not supported methods/properties, return that action was completed.
+            if (this.Config.SilentlyIgnoreNotSupported)
+            {
+                // Set status to true.
+                status = MembershipCreateStatus.Success;
+
+                return new MembershipUser(providerName: this.Config.Name,
+                                                    name: username,
+                                                    providerUserKey: providerUserKey,
+                                                    email: email,
+                                                    passwordQuestion: passwordQuestion,
+                                                    comment: passwordAnswer,
+                                                    isApproved: isApproved,
+                                                    isLockedOut: false,
+                                                    creationDate: DateTime.Now,
+                                                    lastLoginDate: DateTime.Now,
+                                                    lastActivityDate: DateTime.Now,
+                                                    lastPasswordChangedDate: DateTime.Now,
+                                                    lastLockoutDate: DateTime.Now
+                                                    );
+            }
+
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -434,23 +468,35 @@ namespace AdAspNetProvider
         /// </summary>
         public override bool DeleteUser(string username, bool deleteAllRelatedData)
         {
-            throw new NotImplementedException();
+            // If silently ignoring not supported methods/properties, return default value.
+            if (this.Config.SilentlyIgnoreNotSupported)
+            {
+                return true;
+            }
+
+            throw new NotSupportedException();
         }
 
         /// <summary>
-        /// Not implemented.
+        /// Not implemented.  Always returns false.
         /// </summary>
         public override bool EnablePasswordReset
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                return false;
+            }
         }
 
         /// <summary>
-        /// Not implemented.
+        /// Not implemented.  Always returns false.
         /// </summary>
         public override bool EnablePasswordRetrieval
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                return false;
+            }
         }
 
         /// <summary>
@@ -458,7 +504,13 @@ namespace AdAspNetProvider
         /// </summary>
         public override int GetNumberOfUsersOnline()
         {
-            throw new NotImplementedException();
+            // If silently ignoring not supported methods/properties, return default value.
+            if (this.Config.SilentlyIgnoreNotSupported)
+            {
+                return 0;
+            }
+
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -466,7 +518,13 @@ namespace AdAspNetProvider
         /// </summary>
         public override string GetPassword(string username, string answer)
         {
-            throw new NotImplementedException();
+            // If silently ignoring not supported methods/properties, return default value.
+            if (this.Config.SilentlyIgnoreNotSupported)
+            {
+                return String.Empty;
+            }
+
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -474,7 +532,16 @@ namespace AdAspNetProvider
         /// </summary>
         public override int MaxInvalidPasswordAttempts
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                // If silently ignoring not supported methods/properties, return default value.
+                if (this.Config.SilentlyIgnoreNotSupported)
+                {
+                    return 0;
+                }
+
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>
@@ -482,7 +549,16 @@ namespace AdAspNetProvider
         /// </summary>
         public override int MinRequiredNonAlphanumericCharacters
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                // If silently ignoring not supported methods/properties, return default value.
+                if (this.Config.SilentlyIgnoreNotSupported)
+                {
+                    return 0;
+                }
+
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>
@@ -490,7 +566,16 @@ namespace AdAspNetProvider
         /// </summary>
         public override int MinRequiredPasswordLength
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                // If silently ignoring not supported methods/properties, return default value.
+                if (this.Config.SilentlyIgnoreNotSupported)
+                {
+                    return 0;
+                }
+
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>
@@ -498,7 +583,16 @@ namespace AdAspNetProvider
         /// </summary>
         public override int PasswordAttemptWindow
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                // If silently ignoring not supported methods/properties, return default value.
+                if (this.Config.SilentlyIgnoreNotSupported)
+                {
+                    return 0;
+                }
+
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>
@@ -506,7 +600,16 @@ namespace AdAspNetProvider
         /// </summary>
         public override MembershipPasswordFormat PasswordFormat
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                // If silently ignoring not supported methods/properties, return default value.
+                if (this.Config.SilentlyIgnoreNotSupported)
+                {
+                    return MembershipPasswordFormat.Hashed;
+                }
+
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>
@@ -514,7 +617,16 @@ namespace AdAspNetProvider
         /// </summary>
         public override string PasswordStrengthRegularExpression
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                // If silently ignoring not supported methods/properties, return default value.
+                if (this.Config.SilentlyIgnoreNotSupported)
+                {
+                    return String.Empty;
+                }
+
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>
@@ -522,7 +634,16 @@ namespace AdAspNetProvider
         /// </summary>
         public override bool RequiresQuestionAndAnswer
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                // If silently ignoring not supported methods/properties, return default value.
+                if (this.Config.SilentlyIgnoreNotSupported)
+                {
+                    return false;
+                }
+
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>
@@ -530,7 +651,16 @@ namespace AdAspNetProvider
         /// </summary>
         public override bool RequiresUniqueEmail
         {
-            get { throw new NotImplementedException(); }
+            get
+            {
+                // If silently ignoring not supported methods/properties, return default value.
+                if (this.Config.SilentlyIgnoreNotSupported)
+                {
+                    return false;
+                }
+
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>
@@ -538,7 +668,13 @@ namespace AdAspNetProvider
         /// </summary>
         public override string ResetPassword(string username, string answer)
         {
-            throw new NotImplementedException();
+            // If silently ignoring not supported methods/properties, return that action was completed.
+            if (this.Config.SilentlyIgnoreNotSupported)
+            {
+                return String.Empty;
+            }
+
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -546,7 +682,13 @@ namespace AdAspNetProvider
         /// </summary>
         public override bool UnlockUser(string userName)
         {
-            throw new NotImplementedException();
+            // If silently ignoring not supported methods/properties, return that action was completed.
+            if (this.Config.SilentlyIgnoreNotSupported)
+            {
+                return true;
+            }
+
+            throw new NotSupportedException();
         }
 
         /// <summary>
@@ -554,7 +696,13 @@ namespace AdAspNetProvider
         /// </summary>
         public override void UpdateUser(MembershipUser user)
         {
-            throw new NotImplementedException();
+            // If silently ignoring not supported methods/properties, return that action was completed.
+            if (this.Config.SilentlyIgnoreNotSupported)
+            {
+                return;
+            }
+
+            throw new NotSupportedException();
         }
 
         #endregion
