@@ -163,6 +163,14 @@ namespace AdAspNetProvider
             }
         }
 
+        /// <summary>
+        /// Search for users by their e-mail address.
+        /// </summary>
+        /// <param name="emailToMatch">E-mail address to match.</param>
+        /// <param name="pageIndex">Index for paging.</param>
+        /// <param name="pageSize">Number of users for page.</param>
+        /// <param name="totalRecords">Total number of users returned.</param>
+        /// <returns>Collection of matching users.</returns>
         public override MembershipUserCollection FindUsersByEmail(string emailToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
             // Verify that search methods are allowed.
@@ -202,6 +210,14 @@ namespace AdAspNetProvider
             return collection;
         }
 
+        /// <summary>
+        /// Search for users by their name.
+        /// </summary>
+        /// <param name="emailToMatch">E-mail address to match.</param>
+        /// <param name="pageIndex">Index for paging.</param>
+        /// <param name="pageSize">Number of users for page.</param>
+        /// <param name="totalRecords">Total number of users returned.</param>
+        /// <returns>Collection of matching users.</returns>
         public override MembershipUserCollection FindUsersByName(string usernameToMatch, int pageIndex, int pageSize, out int totalRecords)
         {
             // Verify that search methods are allowed.
@@ -302,6 +318,12 @@ namespace AdAspNetProvider
             // Get user.
             var user = this.adConnect.GetUser(username);
 
+            // If user was not found, return null.
+            if (user == null)
+            {
+                return null;
+            }
+
             // Create new membershipUser.
             var membershipUser = new MembershipUser(providerName: this.Config.Name,
                                                     name: this.adConnect.GetNameFromPrincipal(user),
@@ -334,6 +356,12 @@ namespace AdAspNetProvider
 
             // Get user.
             var user = this.adConnect.GetUserBySid((string)providerUserKey);
+
+            // If user was not found, return null.
+            if (user == null)
+            {
+                return null;
+            }
 
             // Create new membershipUser.
             var membershipUser = new MembershipUser(providerName: this.Config.Name,
