@@ -54,7 +54,7 @@ namespace AdAspNetProvider
 
             // Store password and remove domain prefix.  Default to null if they don't exist.
             this.Username = string.IsNullOrWhiteSpace(config["connectionUsername"]) ? null : config["connectionUsername"];
-            if (this.Username.IndexOf('\\') != -1)
+            if ((this.Username != null) && (this.Username.IndexOf('\\') != -1))
             {
                 this.Username = this.Username.Substring(this.Username.IndexOf('\\') + 1);
             }

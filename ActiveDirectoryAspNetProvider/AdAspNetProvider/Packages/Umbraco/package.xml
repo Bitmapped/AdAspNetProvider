@@ -10,7 +10,7 @@
   <info>
     <package>
       <name>AdAspNetProvider</name>
-      <version>4.2.0</version>
+      <version>4.2.1</version>
       <license url="http://www.opensource.org/licenses/mit-license.php">MIT license</license>
       <url>https://adaspnetprovider.codeplex.com/</url>
       <requirements>
