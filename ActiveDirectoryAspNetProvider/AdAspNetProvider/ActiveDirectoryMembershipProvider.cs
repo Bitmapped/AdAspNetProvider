@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
 using System.Web.Caching;
 using System.Web.Security;
-using System.Configuration;
-using System.Configuration.Provider;
 using System.Collections.Specialized;
-using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 
 namespace AdAspNetProvider
