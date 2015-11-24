@@ -1,19 +1,16 @@
 ﻿using AdAspNetProvider.ActiveDirectory;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Configuration;
 using System.Configuration.Provider;
 using System.DirectoryServices.AccountManagement;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
 
 namespace AdAspNetProvider
 {
-    public class ProviderConfiguration : AdAspNetProvider.ActiveDirectory.AdConfiguration
+    public class ProviderConfiguration : AdConfiguration
     {
         #region Constructor
         /// <summary>
@@ -37,7 +34,7 @@ namespace AdAspNetProvider
             }
             if (ConfigurationManager.ConnectionStrings[config["connectionStringName"]] == null)
             {
-                throw new ProviderException(String.Format("Specified \"{0}\" connection string does not exist.", config["connectionStringName"]));
+                throw new ProviderException(string.Format("Specified \"{0}\" connection string does not exist.", config["connectionStringName"]));
             }
             var connectionString = ConfigurationManager.ConnectionStrings[config["connectionStringName"]].ConnectionString;
             if (connectionString.Substring(0, 7) != "LDAP://")
@@ -271,25 +268,25 @@ namespace AdAspNetProvider
         /// <summary>
         /// Ignore default users
         /// </summary>
-        [System.ComponentModel.DefaultValue(true)]
+        [DefaultValue(true)]
         public bool IgnoreDefaultUsers { get; set; }
 
         /// <summary>
         /// Ignore default roles
         /// </summary>
-        [System.ComponentModel.DefaultValue(true)]
+        [DefaultValue(true)]
         public bool IgnoreDefaultRoles { get; set; }
 
         /// <summary>
         /// Allow use of search method functions.
         /// </summary>
-        [System.ComponentModel.DefaultValue(false)]
+        [DefaultValue(false)]
         public bool EnableSearchMethods { get; set; }
 
         /// <summary>
         /// Silently ignore or return generic values for not-implemented AD methods rather than throwing an exception.
         /// </summary>
-        [System.ComponentModel.DefaultValue(false)]
+        [DefaultValue(false)]
         public bool SilentlyIgnoreNotSupported { get; set; }
         #endregion
     }
