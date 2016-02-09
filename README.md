@@ -18,7 +18,7 @@ This project includes two providers:
 This project is available on [NuGet](https://www.nuget.org/packages/AdAspNetProvider)
 
 ## Related projects
-To use `AdAspNetProvider.ActiveDirectoryMembershipProvider` with Umbraco 7.3.1+, also use [UmbBackOfficeAdAspNetProvider](https://umbbackofficeadaspnetprovider.codeplex.com/).
+To use `AdAspNetProvider.ActiveDirectoryMembershipProvider` with Umbraco 7.3.1+, also use [UmbBackofficeMembershipProvider](https://github.com/Bitmapped/UmbBackofficeMembershipProvider).
 
 ## Usage instructions
 ### Getting started
