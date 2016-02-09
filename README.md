@@ -27,15 +27,15 @@ To use `AdAspNetProvider.ActiveDirectoryMembershipProvider` with Umbraco 7.3.1+,
   - Sample configuration:
   ```
   <membership defaultProvider="AdAspNetMembershipProvider">
-        <providers>
-          <add name="AdAspNetMembershipProvider" type="AdAspNetProvider.ActiveDirectoryMembershipProvider" connectionStringName="MyConnectionString" attributeMapUsername="sAMAccountName" connectionDomain="domain.com" connectionUsername="username" connectionPassword="password" ignoreServerIpAddresses="10.0.0.5" />
-        </providers>
-      </membership>
-      <roleManager enabled="true" defaultProvider="AdAspNetRoleProvider">
-        <providers>
-          <add name="AdAspNetRoleProvider" type="AdAspNetProvider.ActiveDirectoryRoleProvider" connectionStringName="MyConnectionString" connectionDomain="domain.com" connectionUsername="username" connectionPassword="password" allowedRoles="Business-Administration,Business-Instructors" rolesToRenameFrom="Company-Administration,Company-Instructors" rolesToRenameTo="Business-Administration,Business-Instructors" />
-        </providers>
-      </roleManager>
+    <providers>
+      <add name="AdAspNetMembershipProvider" type="AdAspNetProvider.ActiveDirectoryMembershipProvider" connectionStringName="MyConnectionString" attributeMapUsername="sAMAccountName" connectionDomain="domain.com" connectionUsername="username" connectionPassword="password" ignoreServerIpAddresses="10.0.0.5" />
+    </providers>
+  </membership>
+  <roleManager enabled="true" defaultProvider="AdAspNetRoleProvider">
+    <providers>
+      <add name="AdAspNetRoleProvider" type="AdAspNetProvider.ActiveDirectoryRoleProvider" connectionStringName="MyConnectionString" connectionDomain="domain.com" connectionUsername="username" connectionPassword="password" allowedRoles="Business-Administration,Business-Instructors" rolesToRenameFrom="Company-Administration,Company-Instructors" rolesToRenameTo="Business-Administration,Business-Instructors" />
+    </providers>
+  </roleManager>
   ```
   
   - Supported options:
