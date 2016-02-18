@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("AdAspNetProvider")]
-[assembly: AssemblyDescription("ASP.NET role and membership providers for Active Directory.")]
+[assembly: AssemblyDescription("MembershipProvider and RoleProvider supporting Active Directory along with options for dynamically renaming roles and restricting user login by role membership.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Brian M. Powell")]
 [assembly: AssemblyProduct("AdAspNetProvider")]
