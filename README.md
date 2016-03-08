@@ -38,22 +38,25 @@ To use `AdAspNetProvider.ActiveDirectoryMembershipProvider` with Umbraco 7.3.1+,
   </roleManager>
   ```
   
-  - Supported options:
-    - `connectionStringName`
-    - `connectionUsername`
-    - `connectionPassword`
-    - `usersToIgnore`
-    - `rolesToIgnore`
-    - `ignoreDefaultUsers`
-    - `ignoreDefaultRoles`
-    - `rolesToRenameFrom`
-    - `rolesToRenameTo`
-    - `allowedUsers`
-    - `allowedRoles`
-    - `cacheDurationInMinutes` (for caching of roles and DNS lookups for Active Directory controllers)
-    - `attributeMapUsername` (to control format of listed role and user names)
-    - `maxAttempts` (maximum number of times to attempt AD operation before failing)
-    - `maxServerFailures` (maximum number of times AD server can fail before removed from current cached list of controllers)
-    - `enableSearchMethods` (true/false if methods for searching for users and groups should be enabled)
-    - `ignoreServerIpAddresses` (comma-delimited listing of server IP addresses that should be ignored if returned by a DNS lookup)
-    - `silentlyIgnoreNotSupported` (true/false if not-supported methods should return generic values rather than throwing NotSupportedException)
+  - Supported options for both membership and role providers:
+    - `connectionStringName` - name of connection string in your **web.config** or **application.config** file
+    - `connectionUsername` - username of account in Active Directory to use with this application
+    - `connectionPassword` - password of account in Active Directory to use with this application
+    - `usersToIgnore` - comma-separated list of blacklisted users that should be ignored (default is empty list)
+    - `rolesToIgnore` - comma-separated list of blacklisted roles (Active Directory groups) that should be ignored (default is empty list)
+    - `ignoreDefaultUsers` - true/false if [common user accounts](https://gist.github.com/Bitmapped/e532454f6a64ef52ca7e) should be ignored (default true)
+    - `ignoreDefaultRoles` - true/false if [common roles](https://gist.github.com/Bitmapped/e532454f6a64ef52ca7e) should be ignored (default true)
+    - `rolesToRenameFrom` - ordered comma-separated list of roles you wish to rename; if role is not in list, it's not renamed (default is empty list)
+    - `rolesToRenameTo` - ordered comma-separated list of new names for roles being renamed (default is empty list)
+    - `allowedUsers` - comma-separated list of whitelisted users that should be treated as only valid users (default is empty list, which does not restrict users)
+    - `allowedRoles` - comma-separeted list of whitelisted roles that should be treated as only valid roles (default is empty list, which does not restrict roles)
+    - `cacheDurationInMinutes` - for caching of roles and DNS lookups for Active Directory controllers
+    - `attributeMapUsername` - to control format of listed role and user names as `sAMAccountName` or `userPrincipalName`
+    - `maxAttempts` - maximum number of times to attempt AD operation before failing
+    - `maxServerFailures` - maximum number of times AD server can fail before removed from current cached list of controllers
+    - `enableSearchMethods` - true/false if methods for searching for users and groups should be enabled
+    - `ignoreServerIpAddresses` - comma-separated list of server IP addresses that should be ignored if returned by a DNS lookup
+    - `silentlyIgnoreNotSupported` - true/false if not-supported methods should return generic values rather than throwing NotSupportedException
+
+- Supported options for role providers only:
+  - `recursiveRoleMembership` - true/false if user should be considered member of any roles (Active Directory groups) that include roles they are already a member of (default false)
