@@ -7,7 +7,6 @@ using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 using System.DirectoryServices.ActiveDirectory;
 using System.Net;
-using Logging = AdAspNetProvider.Logging;
 
 namespace AdAspNetProvider.ActiveDirectory.Service
 {
@@ -95,9 +94,8 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                 }
             }
 
-            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Throw exception.
             var pe = new PrincipalServerDownException(this.Config.Server);
-            Logging.Log.LogError(pe);
             throw pe;
         }
 
@@ -140,9 +138,8 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                 }
             }
 
-            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Throw exception.
             var pe = new PrincipalServerDownException(this.Config.Server);
-            Logging.Log.LogError(pe);
             throw pe;
         }
 
@@ -195,9 +192,8 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                 }
             }
 
-            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Throw exception.
             var pe = new PrincipalServerDownException(this.Config.Server);
-            Logging.Log.LogError(pe);
             throw pe;
         }
 
@@ -252,9 +248,8 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                 }
             }
 
-            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Throw exception.
             var pe = new PrincipalServerDownException(this.Config.Server);
-            Logging.Log.LogError(pe);
             throw pe;
         }
 
@@ -309,9 +304,8 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                 }
             }
 
-            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Throw exception.
             var pe = new PrincipalServerDownException(this.Config.Server);
-            Logging.Log.LogError(pe);
             throw pe;
         }
 
@@ -356,9 +350,8 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                 }
             }
 
-            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Throw exception.
             var pe = new PrincipalServerDownException(this.Config.Server);
-            Logging.Log.LogError(pe);
             throw pe;
         }
 
@@ -418,9 +411,8 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                 }
             }
 
-            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Throw exception.
             var pe = new PrincipalServerDownException(this.Config.Server);
-            Logging.Log.LogError(pe);
             throw pe;
         }
 
@@ -465,9 +457,8 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                 }
             }
 
-            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Throw exception.
             var pe = new PrincipalServerDownException(this.Config.Server);
-            Logging.Log.LogError(pe);
             throw pe;
         }
 
@@ -545,9 +536,8 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                 }
             }
 
-            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Throw exception.
             var pe = new PrincipalServerDownException(this.Config.Server);
-            Logging.Log.LogError(pe);
             throw pe;
         }
 
@@ -633,9 +623,6 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                         }
                         catch (PrincipalOperationException poe)
                         {
-                            // Log error.
-                            Logging.Log.LogError(poe);
-
                             continue;
                         }
                     }
@@ -661,9 +648,8 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                 }
             }
 
-            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Log and rethrow.
+            // If we've reached this point, number of loop attempts have been exhausted because of caught PrincipalServerDownExceptions.  Throw exception.
             var pe = new PrincipalServerDownException(this.Config.Server);
-            Logging.Log.LogError(pe);
             throw pe;
 
 
@@ -734,9 +720,6 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                     }
                     catch (PrincipalOperationException pe)
                     {
-                        // Log error.
-                        Logging.Log.LogError(pe);
-
                         continue;
                     }
                 }
