@@ -2,3 +2,5 @@ packages
 /ActiveDirectoryAspNetProvider/AdAspNetProvider/obj/Debug
 /ActiveDirectoryAspNetProvider/AdAspNetProvider/obj/NuGet
 /ActiveDirectoryAspNetProvider/.vs/AdAspNetProvider/v14
+/src/AdAspNetProvider/bin
+/src/AdAspNetProvider/obj

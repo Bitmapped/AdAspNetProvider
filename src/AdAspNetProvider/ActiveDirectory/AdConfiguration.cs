@@ -9,7 +9,10 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <summary>
         /// Constructor to define default values.
         /// </summary>
-        public AdConfiguration() : base()
+        /// <param name="connectionString">Connection string to use for the server.</param>
+        /// <param name="username">Username for connection.</param>
+        /// <param name="password">Password for connection.</param>
+        public AdConfiguration(string connectionString = null, string username = null, string password = null) : base(connectionString, username, password)
         {
             // Default groups to ignore.
             this.GroupsToIgnore = new List<string>(new string[] {"Domain Guests", "Domain Computers", "Group Policy Creator Owners", "Guests", "Users",

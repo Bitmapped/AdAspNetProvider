@@ -19,7 +19,7 @@ namespace AdAspNetProvider
         /// <param name="name">Name of provider.</param>
         /// <param name="config">Configuration settings.</param>
         public ProviderConfiguration(string name, NameValueCollection config)
-            : base()
+            : base(username: config["connectionUsername"], password: config["connectionPassword"])
         {
             // Check to ensure configuration is specified.
             if (config == null)
@@ -48,16 +48,6 @@ namespace AdAspNetProvider
             var ldapUri = new Uri(connectionString);
             this.Server = ldapUri.DnsSafeHost;
             this.Container = ldapUri.AbsolutePath.Substring(1);
-
-            // Store password and remove domain prefix.  Default to null if they don't exist.
-            this.Username = string.IsNullOrWhiteSpace(config["connectionUsername"]) ? null : config["connectionUsername"];
-            if ((this.Username != null) && (this.Username.IndexOf('\\') != -1))
-            {
-                this.Username = this.Username.Substring(this.Username.IndexOf('\\') + 1);
-            }
-
-            // Store password.  Default to null if it doesn't exist.
-            this.Password = string.IsNullOrWhiteSpace(config["connectionPassword"]) ? null : config["connectionPassword"];
 
             // Store connection name.
             this.Name = name;

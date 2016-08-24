@@ -400,13 +400,26 @@ namespace AdAspNetProvider.ActiveDirectory
             string principalName = null;
             try
             {
-                // Extract name from underlying DirectoryEntry object.
-                principalName = ((DirectoryEntry)principal.GetUnderlyingObject()).Properties[this.Config.IdentityType.ToString()].Value.ToString();
-
                 // If principal is a group object, try to perform rename.
                 if (principal is GroupPrincipal)
                 {
+                    if (this.Config.IdentityType == IdentityType.UserPrincipalName)
+                    {
+                        // UserPrincipalName is null for groups. Use Name value instead.
+                        principalName = ((DirectoryEntry)principal.GetUnderlyingObject()).Properties[IdentityType.Name.ToString()].Value.ToString();
+                    }
+                    else
+                    {
+                        // Name exists in correct format for all IdentityTypes except UserPrincipalName. Use correct format.
+                        principalName = ((DirectoryEntry)principal.GetUnderlyingObject()).Properties[this.Config.IdentityType.ToString()].Value.ToString();
+                    }
+                    
                     principalName = this.GetRenamedGroup(principalName);
+                }
+                else
+                {
+                    // Principal is not a group. Use specified format.
+                    principalName = ((DirectoryEntry)principal.GetUnderlyingObject()).Properties[this.Config.IdentityType.ToString()].Value.ToString();
                 }
             }
             catch { }
