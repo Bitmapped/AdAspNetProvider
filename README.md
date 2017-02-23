@@ -60,3 +60,8 @@ To use `AdAspNetProvider.ActiveDirectoryMembershipProvider` with Umbraco 7.3.1+,
 
 - Supported options for role providers only:
   - `recursiveRoleMembership` - true/false if user should be considered member of any roles (Active Directory groups) that include roles they are already a member of (default false)
+
+### Using with Umbraco
+AdAspNetProvider can be used to provide public members and member groups functionality in Umbraco. It can also be used to provide backend users functionality.
+
+When using ActiveDirectoryRoleProvider in Umbraco to handle public member groups, you must set the `enableSearchMethods` property to true in your connection string.
