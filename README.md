@@ -49,7 +49,7 @@ To use `AdAspNetProvider.ActiveDirectoryMembershipProvider` with Umbraco 7.3.1+,
     - `rolesToRenameFrom` - ordered comma-separated list of roles you wish to rename; if role is not in list, it's not renamed (default is empty list)
     - `rolesToRenameTo` - ordered comma-separated list of new names for roles being renamed (default is empty list)
     - `allowedUsers` - comma-separated list of whitelisted users that should be treated as only valid users (default is empty list, which does not restrict users)
-    - `allowedRoles` - comma-separeted list of whitelisted roles that should be treated as only valid roles (default is empty list, which does not restrict roles)
+    - `allowedRoles` - comma-separated list of whitelisted roles that should be treated as only valid roles (default is empty list, which does not restrict roles)
     - `cacheDurationInMinutes` - for caching of roles and DNS lookups for Active Directory controllers
     - `attributeMapUsername` - to control format of listed role and user names as `sAMAccountName` or `userPrincipalName`
     - `maxAttempts` - maximum number of times to attempt AD operation before failing
