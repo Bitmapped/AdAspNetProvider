@@ -413,7 +413,7 @@ namespace AdAspNetProvider.ActiveDirectory
                         // Name exists in correct format for all IdentityTypes except UserPrincipalName. Use correct format.
                         principalName = ((DirectoryEntry)principal.GetUnderlyingObject()).Properties[this.Config.IdentityType.ToString()].Value.ToString();
                     }
-                    
+
                     principalName = this.GetRenamedGroup(principalName);
                 }
                 else
@@ -538,32 +538,55 @@ namespace AdAspNetProvider.ActiveDirectory
             // Filter for allowed users.
             if (this.Config.AllowedGroups.Any())
             {
+                // Iterate through Allowed Groups
+                foreach (var allowedGroup in this.Config.AllowedGroups)
+                {
+                    //attempt to get group 
+                    Principal principalItem = (Principal)originalGroups.FirstOrDefault(s => s.Name.Equals(allowedGroup));
+
+                    //if found = allowed; add to output
+                    if (principalItem != null)
+                        processedGroups.Add(principalItem);
+                }
+
                 // Iterate through list of original users to see if they are allowed.
-                foreach (var originalGroup in originalGroups)
+                /* foreach (var originalGroup in originalGroups)
                 {
                     if (this.Config.AllowedGroups.Contains(GetRenamedGroup(this.GetNameFromPrincipal(originalGroup))))
                     {
                         // User on allowed list.  Add to output.
                         processedGroups.Add(originalGroup);
                     }
-                }
+                } */
             }
             else
             {
+                //assume all groups are allowed initially
+                processedGroups = originalGroups.ToList<Principal>();
+
+                // Iterate through Excluded Groups
+                foreach (var ignoredGroup in this.Config.GroupsToIgnore)
+                {
+                    //attempt to get group 
+                    Principal principalItem = (Principal)originalGroups.FirstOrDefault(s => s.Name.Equals(ignoredGroup));
+
+                    //if found = exclude; remove from output
+                    if (principalItem != null)
+                        processedGroups.Remove(principalItem);
+                }
+
                 // Iterate through list of original users to see if they are to be ignored.
-                foreach (var originalGroup in originalGroups)
+                /* foreach (var originalGroup in originalGroups)
                 {
                     if (this.Config.GroupsToIgnore.Contains(GetRenamedGroup(this.GetNameFromPrincipal(originalGroup))) == false)
                     {
                         // User not on ignore list.  Add to output.
                         processedGroups.Add(originalGroup);
                     }
-                }
+                } */
             }
 
             return processedGroups;
         }
-        #endregion
-
     }
-}
+    }
