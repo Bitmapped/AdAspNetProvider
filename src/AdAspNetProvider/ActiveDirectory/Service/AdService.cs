@@ -622,7 +622,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                                 groups.Add(group);
                             }
                         }
-                        catch (PrincipalOperationException poe)
+                        catch (PrincipalOperationException)
                         {
                             continue;
                         }

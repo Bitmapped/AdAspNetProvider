@@ -50,31 +50,13 @@ namespace AdAspNetProvider.ActiveDirectory
 
         #region Methods for groups
         /// <summary>
-        /// Get all groups.
-        /// </summary>
-        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
-        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
-        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
-        /// <returns>Collection of all groups.</returns>
-        public IEnumerable<Principal> GetAllGroups(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
-        {
-            // Get principals for all groups.
-            var groupPrincipals = this.adService.GetAllGroups(pageIndex, pageSize, sortOrder);
-
-            // Process groups for rename, ignore, and allowed.
-            groupPrincipals = this.ProcessIgnoreAllowedGroups(groupPrincipals);
-
-            return groupPrincipals;
-        }
-
-        /// <summary>
         /// Get all group names.
         /// </summary>
         /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all groups.</returns>
-        public IEnumerable<string> GetAllGroupNames(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        public IEnumerable<string> GetAllGroupNames(int? pageIndex = null, int? pageSize = null, IdentityType? sortOrder = null)
         {
             // Get group principals.
             var groupPrincipals = this.GetAllGroups(pageIndex, pageSize, sortOrder);
@@ -85,6 +67,23 @@ namespace AdAspNetProvider.ActiveDirectory
             return groups;
         }
 
+        /// <summary>
+        /// Get all groups.
+        /// </summary>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
+        /// <returns>Collection of all groups.</returns>
+        public IEnumerable<Principal> GetAllGroups(int? pageIndex = null, int? pageSize = null, IdentityType? sortOrder = null)
+        {
+            // Get principals for all groups.
+            var groupPrincipals = this.adService.GetAllGroups(pageIndex, pageSize, sortOrder);
+
+            // Process groups for rename, ignore, and allowed.
+            groupPrincipals = this.ProcessIgnoreAllowedGroups(groupPrincipals);
+
+            return groupPrincipals;
+        }
         /// <summary>
         /// Determine if specified group exists.
         /// </summary>
@@ -97,6 +96,80 @@ namespace AdAspNetProvider.ActiveDirectory
         #endregion
 
         #region Methods for users.
+        /// <summary>
+        /// Find all users whose e-mail address matches the given string.
+        /// </summary>
+        /// <param name="email">E-mail address (full or partial) to match.</param>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
+        /// <returns>Collection of all users.</returns>
+        public IEnumerable<Principal> FindUsersByEmail(string email, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        {
+            // Get principals that match email.
+            var userPrincipals = this.adService.FindUsersByEmail(email, pageIndex, pageSize, sortOrder);
+
+            // Process users for ignore and allowed.
+            userPrincipals = this.ProcessIgnoredAllowedUsers(userPrincipals);
+
+            return userPrincipals;
+        }
+
+        /// <summary>
+        /// Find all users whose username matches the given string.
+        /// </summary>
+        /// <param name="username">E-mail address (full or partial) to match.</param>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by account name.</param>
+        /// <returns>Collection of all users.</returns>
+        public IEnumerable<Principal> FindUsersByName(string username, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = IdentityType.SamAccountName)
+        {
+            // Get principals that match email.
+            var userPrincipals = this.adService.FindUsersByName(username, pageIndex, pageSize, sortOrder);
+
+            // Process users for ignore and allowed.
+            userPrincipals = this.ProcessIgnoredAllowedUsers(userPrincipals);
+
+            return userPrincipals;
+        }
+
+        /// <summary>
+        /// Get all user names.
+        /// </summary>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
+        /// <returns>Collection of all users.</returns>
+        public IEnumerable<string> GetAllUserNames(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        {
+            // Process entries.
+            var userPrincipals = this.GetAllUsers(pageIndex, pageSize, sortOrder);
+
+            // Process entries.
+            var users = this.GetNamesFromPrincipals(userPrincipals);
+
+            return users;
+        }
+
+        /// <summary>
+        /// Get all users.
+        /// </summary>
+        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
+        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
+        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
+        /// <returns>Collection of all users.</returns>
+        public IEnumerable<Principal> GetAllUsers(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        {
+            // Get principals for all users.
+            var userPrincipals = this.adService.GetAllUsers(pageIndex, pageSize, sortOrder);
+
+            // Process users for ignore and allowed.
+            userPrincipals = this.ProcessIgnoredAllowedUsers(userPrincipals);
+
+            return userPrincipals;
+        }
+
         /// <summary>
         /// Load the listed user.
         /// </summary>
@@ -153,81 +226,6 @@ namespace AdAspNetProvider.ActiveDirectory
 
             return user;
         }
-
-        /// <summary>
-        /// Get all users.
-        /// </summary>
-        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
-        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
-        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
-        /// <returns>Collection of all users.</returns>
-        public IEnumerable<Principal> GetAllUsers(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
-        {
-            // Get principals for all users.
-            var userPrincipals = this.adService.GetAllUsers(pageIndex, pageSize, sortOrder);
-
-            // Process users for ignore and allowed.
-            userPrincipals = this.ProcessIgnoredAllowedUsers(userPrincipals);
-
-            return userPrincipals;
-        }
-
-        /// <summary>
-        /// Get all user names.
-        /// </summary>
-        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
-        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
-        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
-        /// <returns>Collection of all users.</returns>
-        public IEnumerable<string> GetAllUserNames(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
-        {
-            // Process entries.
-            var userPrincipals = this.GetAllUsers(pageIndex, pageSize, sortOrder);
-
-            // Process entries.
-            var users = this.GetNamesFromPrincipals(userPrincipals);
-
-            return users;
-        }
-
-        /// <summary>
-        /// Find all users whose e-mail address matches the given string.
-        /// </summary>
-        /// <param name="email">E-mail address (full or partial) to match.</param>
-        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
-        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
-        /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
-        /// <returns>Collection of all users.</returns>
-        public IEnumerable<Principal> FindUsersByEmail(string email, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
-        {
-            // Get principals that match email.
-            var userPrincipals = this.adService.FindUsersByEmail(email, pageIndex, pageSize, sortOrder);
-
-            // Process users for ignore and allowed.
-            userPrincipals = this.ProcessIgnoredAllowedUsers(userPrincipals);
-
-            return userPrincipals;
-        }
-
-        /// <summary>
-        /// Find all users whose username matches the given string.
-        /// </summary>
-        /// <param name="username">E-mail address (full or partial) to match.</param>
-        /// <param name="pageIndex">Zero-based index of page to return, or null for all results.</param>
-        /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
-        /// <param name="sortOrder">Sort order for results, or null to sort by account name.</param>
-        /// <returns>Collection of all users.</returns>
-        public IEnumerable<Principal> FindUsersByName(string username, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = IdentityType.SamAccountName)
-        {
-            // Get principals that match email.
-            var userPrincipals = this.adService.FindUsersByName(username, pageIndex, pageSize, sortOrder);
-
-            // Process users for ignore and allowed.
-            userPrincipals = this.ProcessIgnoredAllowedUsers(userPrincipals);
-
-            return userPrincipals;
-        }
-
         /// <summary>
         /// Determine if specified user exists.
         /// </summary>
@@ -277,37 +275,20 @@ namespace AdAspNetProvider.ActiveDirectory
 
         #region Methods for fetching user-group relationships.
         /// <summary>
-        /// Get users within a group.
+        /// Get list of group names for this user is a member.
         /// </summary>
-        /// <param name="group">Group to test.</param>
-        /// <param name="recursive">Recursively search children.</param>
-        /// <returns>Collection of users of group.</returns>
-        public IEnumerable<Principal> GetUsersForGroup(string group, bool recursive = true)
+        /// <param name="username">Username to check.</param>
+        /// <param name="recursive">Recursive search for groups.</param>
+        /// <returns>Collection of groups for which this user is a member.</returns>
+        public IEnumerable<string> GetGroupNamesForUser(string username, bool recursive = true)
         {
-            // Get principals for users.
-            var userPrincipals = this.adService.GetUsersForGroup(this.GetRenamedFromGroup(group), recursive);
-
-            // Process users for ignore and allowed.
-            userPrincipals = this.ProcessIgnoredAllowedUsers(userPrincipals);
-
-            return userPrincipals;
-        }
-
-        /// <summary>
-        /// Get user names within a group.
-        /// </summary>
-        /// <param name="group">Group to test.</param>
-        /// <param name="recursive">Recursively search children.</param>
-        /// <returns>Collection of users of group.</returns>
-        public IEnumerable<string> GetUserNamesForGroup(string group, bool recursive = true)
-        {
-            // Process users for ignore and allowed.
-            var userPrincipals = this.GetUsersForGroup(group, recursive);
+            // Process groups for rename, ignore, and allowed.
+            var groupPrincipals = this.GetGroupsForUser(username, recursive);
 
             // Process entries.
-            var users = this.GetNamesFromPrincipals(userPrincipals);
+            var groups = this.GetNamesFromPrincipals(groupPrincipals);
 
-            return users;
+            return groups;
         }
 
         /// <summary>
@@ -328,22 +309,38 @@ namespace AdAspNetProvider.ActiveDirectory
         }
 
         /// <summary>
-        /// Get list of group names for this user is a member.
+        /// Get user names within a group.
         /// </summary>
-        /// <param name="username">Username to check.</param>
-        /// <param name="recursive">Recursive search for groups.</param>
-        /// <returns>Collection of groups for which this user is a member.</returns>
-        public IEnumerable<string> GetGroupNamesForUser(string username, bool recursive = true)
+        /// <param name="group">Group to test.</param>
+        /// <param name="recursive">Recursively search children.</param>
+        /// <returns>Collection of users of group.</returns>
+        public IEnumerable<string> GetUserNamesForGroup(string group, bool recursive = true)
         {
-            // Process groups for rename, ignore, and allowed.
-            var groupPrincipals = this.GetGroupsForUser(username, recursive);
+            // Process users for ignore and allowed.
+            var userPrincipals = this.GetUsersForGroup(group, recursive);
 
             // Process entries.
-            var groups = this.GetNamesFromPrincipals(groupPrincipals);
+            var users = this.GetNamesFromPrincipals(userPrincipals);
 
-            return groups;
+            return users;
         }
 
+        /// <summary>
+        /// Get users within a group.
+        /// </summary>
+        /// <param name="group">Group to test.</param>
+        /// <param name="recursive">Recursively search children.</param>
+        /// <returns>Collection of users of group.</returns>
+        public IEnumerable<Principal> GetUsersForGroup(string group, bool recursive = true)
+        {
+            // Get principals for users.
+            var userPrincipals = this.adService.GetUsersForGroup(this.GetRenamedFromGroup(group), recursive);
+
+            // Process users for ignore and allowed.
+            userPrincipals = this.ProcessIgnoredAllowedUsers(userPrincipals);
+
+            return userPrincipals;
+        }
         /// <summary>
         /// Determines if user is a member of group.
         /// </summary>
@@ -358,6 +355,71 @@ namespace AdAspNetProvider.ActiveDirectory
         #endregion
 
         #region Support methods for processing principals.
+        /// <summary>
+        /// Gets the specified name for one principal.
+        /// </summary>
+        /// <param name="principal">Principal to process.</param>
+        /// <returns>Name for principal.</returns>
+        public string GetNameFromPrincipal(Principal principal)
+        {
+            // Get name of principal.
+            try
+            {
+                // If principal is a group object, try to perform rename.
+                if (principal is GroupPrincipal)
+                {
+                    switch (this.Config.IdentityType)
+                    {
+                        case IdentityType.SamAccountName:
+                            return this.GetRenamedGroup(principal.SamAccountName);
+
+                        case IdentityType.Name:
+                        case IdentityType.UserPrincipalName:
+                        default:
+                            return this.GetRenamedGroup(principal.Name);
+
+                        case IdentityType.DistinguishedName:
+                            return this.GetRenamedGroup(principal.DistinguishedName);
+
+                        case IdentityType.Sid:
+                            return this.GetRenamedGroup(principal.Sid?.ToString());
+
+                        case IdentityType.Guid:
+                            return this.GetRenamedGroup(principal.Guid?.ToString());
+                    }
+                }
+                else
+                {
+                    // Get principal name as is.
+                    switch (this.Config.IdentityType)
+                    {
+                        case IdentityType.SamAccountName:
+                            return principal.SamAccountName;
+
+                        case IdentityType.Name:
+                        default:
+                            return principal.Name;
+
+                        case IdentityType.UserPrincipalName:
+                            return principal.UserPrincipalName;
+
+                        case IdentityType.DistinguishedName:
+                            return principal.DistinguishedName;
+
+                        case IdentityType.Sid:
+                            return principal.Sid?.ToString();
+
+                        case IdentityType.Guid:
+                            return principal.Guid?.ToString();
+                    }
+                }
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
         /// <summary>
         /// Processes list of principals to get names.
         /// </summary>
@@ -388,65 +450,9 @@ namespace AdAspNetProvider.ActiveDirectory
 
             return names;
         }
-
-        /// <summary>
-        /// Gets the specified name for one principal.
-        /// </summary>
-        /// <param name="principal">Principal to process.</param>
-        /// <returns>Name for principal.</returns>
-        public string GetNameFromPrincipal(Principal principal)
-        {
-            // Get name of principal.
-            string principalName = null;
-            try
-            {
-                // If principal is a group object, try to perform rename.
-                if (principal is GroupPrincipal)
-                {
-                    if (this.Config.IdentityType == IdentityType.UserPrincipalName)
-                    {
-                        // UserPrincipalName is null for groups. Use Name value instead.
-                        principalName = ((DirectoryEntry)principal.GetUnderlyingObject()).Properties[IdentityType.Name.ToString()].Value.ToString();
-                    }
-                    else
-                    {
-                        // Name exists in correct format for all IdentityTypes except UserPrincipalName. Use correct format.
-                        principalName = ((DirectoryEntry)principal.GetUnderlyingObject()).Properties[this.Config.IdentityType.ToString()].Value.ToString();
-                    }
-
-                    principalName = this.GetRenamedGroup(principalName);
-                }
-                else
-                {
-                    // Principal is not a group. Use specified format.
-                    principalName = ((DirectoryEntry)principal.GetUnderlyingObject()).Properties[this.Config.IdentityType.ToString()].Value.ToString();
-                }
-            }
-            catch { }
-
-            return principalName;
-        }
         #endregion
 
         #region Support methods for renaming groups.
-        /// <summary>
-        /// Gets renamed name for specified group.
-        /// </summary>
-        /// <param name="renameFrom">Group to rename.</param>
-        /// <returns>Renamed name.</returns>
-        private string GetRenamedGroup(string renameFrom)
-        {
-            // If rename list contains renameFrom, get its value.
-            if (!String.IsNullOrWhiteSpace(renameFrom) && this.Config.GroupsToRename.ContainsKey(renameFrom))
-            {
-                return this.Config.GroupsToRename[renameFrom];
-            }
-            else
-            {
-                return renameFrom;
-            }
-        }
-
         /// <summary>
         /// Given new name for renamed group, find original name.
         /// </summary>
@@ -471,9 +477,81 @@ namespace AdAspNetProvider.ActiveDirectory
             return renameTo;
 
         }
+
+        /// <summary>
+        /// Gets renamed name for specified group.
+        /// </summary>
+        /// <param name="renameFrom">Group to rename.</param>
+        /// <returns>Renamed name.</returns>
+        private string GetRenamedGroup(string renameFrom)
+        {
+            // If rename list contains renameFrom, get its value.
+            if (!String.IsNullOrWhiteSpace(renameFrom) && this.Config.GroupsToRename.ContainsKey(renameFrom))
+            {
+                return this.Config.GroupsToRename[renameFrom];
+            }
+            else
+            {
+                return renameFrom;
+            }
+        }
         #endregion
 
         #region Support methods for processing ignored and allowed users and groups.
+        /// <summary>
+        /// Processes collection of groups to ignore and allow.
+        /// </summary>
+        /// <param name="originalGroups">Original collection of groups.</param>
+        /// <returns>Processed collection of groups.</returns>
+        private IEnumerable<Principal> ProcessIgnoreAllowedGroups(IEnumerable<Principal> originalGroups)
+        {
+            // If there are no originalGroups, return empty list.
+            if (originalGroups == null)
+            {
+                return Enumerable.Empty<Principal>();
+            }
+
+            // New list of users.
+            var processedGroups = new List<Principal>();
+
+            // Filter for allowed users.
+            if (this.Config.AllowedGroups.Any())
+            {
+                // Iterate through allowed groups.
+                foreach (var allowedGroup in this.Config.AllowedGroups)
+                {
+                    // Atempt to get group.
+                    Principal principalItem = originalGroups.FirstOrDefault(s => this.GetNameFromPrincipal(s) == allowedGroup);
+
+                    // If item was found, it is allowed. Add to output.
+                    if (principalItem != null)
+                    {
+                        processedGroups.Add(principalItem);
+                    }
+                }
+            }
+            else
+            {
+                //assume all groups are allowed initially
+                processedGroups = originalGroups.ToList<Principal>();
+
+                // Iterate through Excluded Groups
+                foreach (var ignoredGroup in this.Config.GroupsToIgnore)
+                {
+                    // Attempt to get group.
+                    Principal principalItem = originalGroups.FirstOrDefault(s => this.GetNameFromPrincipal(s) == ignoredGroup);
+
+                    // If item was found, it should be ignored. Remove from output.
+                    if (principalItem != null)
+                    {
+                        processedGroups.Remove(principalItem);
+                    }
+                }
+            }
+
+            return processedGroups;
+        }
+
         /// <summary>
         /// Processes collection of users to rename, ignore, and allow users.
         /// </summary>
@@ -496,123 +574,36 @@ namespace AdAspNetProvider.ActiveDirectory
                 // Iterate through Allowed Users
                 foreach (var allowedUser in this.Config.AllowedUsers)
                 {
-                    //attempt to get user (may need to change to use SamAccountName)
-                    Principal principalItem = (Principal)originalUsers.FirstOrDefault(s => s.Name.Equals(allowedUser));
+                    // Attempt to get user.
+                    Principal principalItem = originalUsers.FirstOrDefault(s => this.GetNameFromPrincipal(s) == allowedUser);
 
-                    //if found = allowed; add to output
+                    // If allowed user was found, it is allowed. Add it to output.
                     if (principalItem != null)
-                        processedUsers.Add(principalItem);
-                }
-
-                // Iterate through list of original users to see if they are allowed.
-                /*foreach (var originalUser in originalUsers)
-                {
-                    if (this.Config.AllowedUsers.Contains(this.GetNameFromPrincipal(originalUser)))
                     {
-                        // User on allowed list.  Add to output.
-                        processedUsers.Add(originalUser);
+                        processedUsers.Add(principalItem);
                     }
-                }*/
+                }
             }
             else
             {
-                //assume all users are allowed initially
-                processedUsers = originalUsers.ToList<Principal>();
+                // Assume all users are allowed initially.
+                processedUsers = originalUsers.ToList();
 
                 // Iterate through Excluded Users
                 foreach (var ignoredUser in this.Config.UsersToIgnore)
                 {
-                    //attempt to get user (may need to change to use SamAccountName)
-                    Principal principalItem = (Principal)originalUsers.FirstOrDefault(s => s.Name.Equals(ignoredUser));
+                    // Attempt to get user.
+                    Principal principalItem = originalUsers.FirstOrDefault(s => this.GetNameFromPrincipal(s) == ignoredUser);
 
-                    //if found = exclude; remove from output
+                    // If user was found, it should be ignored. Remove it from output.
                     if (principalItem != null)
-                        processedUsers.Remove(principalItem);
-                }
-
-                // Iterate through list of original users to see if they are to be ignored.
-                /*foreach (var originalUser in originalUsers)
-                {
-                    if (this.Config.UsersToIgnore.Contains(this.GetNameFromPrincipal(originalUser)) == false)
                     {
-                        // User not on ignore list.  Add to output.
-                        processedUsers.Add(originalUser);
+                        processedUsers.Remove(principalItem);
                     }
-                }*/
+                }
             }
 
             return processedUsers;
-        }
-
-
-        /// <summary>
-        /// Processes collection of groups to ignore and allow.
-        /// </summary>
-        /// <param name="originalGroups">Original collection of groups.</param>
-        /// <returns>Processed collection of groups.</returns>
-        private IEnumerable<Principal> ProcessIgnoreAllowedGroups(IEnumerable<Principal> originalGroups)
-        {
-            // If there are no originalGroups, return empty list.
-            if (originalGroups == null)
-            {
-                return Enumerable.Empty<Principal>();
-            }
-
-            // New list of users.
-            var processedGroups = new List<Principal>();
-
-            // Filter for allowed users.
-            if (this.Config.AllowedGroups.Any())
-            {
-                // Iterate through Allowed Groups
-                foreach (var allowedGroup in this.Config.AllowedGroups)
-                {
-                    //attempt to get group 
-                    Principal principalItem = (Principal)originalGroups.FirstOrDefault(s => s.Name.Equals(allowedGroup));
-
-                    //if found = allowed; add to output
-                    if (principalItem != null)
-                        processedGroups.Add(principalItem);
-                }
-
-                // Iterate through list of original users to see if they are allowed.
-                /* foreach (var originalGroup in originalGroups)
-                {
-                    if (this.Config.AllowedGroups.Contains(GetRenamedGroup(this.GetNameFromPrincipal(originalGroup))))
-                    {
-                        // User on allowed list.  Add to output.
-                        processedGroups.Add(originalGroup);
-                    }
-                } */
-            }
-            else
-            {
-                //assume all groups are allowed initially
-                processedGroups = originalGroups.ToList<Principal>();
-
-                // Iterate through Excluded Groups
-                foreach (var ignoredGroup in this.Config.GroupsToIgnore)
-                {
-                    //attempt to get group 
-                    Principal principalItem = (Principal)originalGroups.FirstOrDefault(s => s.Name.Equals(ignoredGroup));
-
-                    //if found = exclude; remove from output
-                    if (principalItem != null)
-                        processedGroups.Remove(principalItem);
-                }
-
-                // Iterate through list of original users to see if they are to be ignored.
-                /* foreach (var originalGroup in originalGroups)
-                {
-                    if (this.Config.GroupsToIgnore.Contains(GetRenamedGroup(this.GetNameFromPrincipal(originalGroup))) == false)
-                    {
-                        // User not on ignore list.  Add to output.
-                        processedGroups.Add(originalGroup);
-                    }
-                } */
-            }
-
-            return processedGroups;
         }
         #endregion 
     }
