@@ -206,7 +206,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by account name.</param>
         /// <returns>Collection of all users.</returns>
-        public ICollection<Principal> FindUsersByName(string username, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = IdentityType.SamAccountName)
+        public IEnumerable<Principal> FindUsersByName(string username, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = IdentityType.SamAccountName)
         {
             // Ensure search criteria was specified.
             if (String.IsNullOrWhiteSpace(username))
@@ -262,7 +262,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all users.</returns>
-        public ICollection<Principal> FindUsersByEmail(string email, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        public IEnumerable<Principal> FindUsersByEmail(string email, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Ensure search criteria was specified.
             if (String.IsNullOrWhiteSpace(email))
@@ -317,7 +317,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all users.</returns>
-        public ICollection<Principal> GetAllUsers(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        public IEnumerable<Principal> GetAllUsers(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Loop to re-attempt.
             for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
@@ -424,7 +424,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all groups.</returns>
-        public ICollection<Principal> GetAllGroups(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        public IEnumerable<Principal> GetAllGroups(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Loop to re-attempt.
             for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
@@ -485,7 +485,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <param name="group">Group to test.</param>
         /// <param name="recursive">Recursively search children.</param>
         /// <returns>Collection of users of group.</returns>
-        public ICollection<Principal> GetUsersForGroup(string group, bool recursive = true)
+        public IEnumerable<Principal> GetUsersForGroup(string group, bool recursive = true)
         {
             // Loop to re-attempt.
             for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
@@ -501,7 +501,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                     // If group doesn't exist, return empty list.
                     if (groupPrincipal == null)
                     {
-                        return new List<Principal>();
+                        return Enumerable.Empty<Principal>();
                     }
 
                     // Get and process results.
@@ -573,7 +573,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <param name="username">Username to check.</param>
         /// <param name="recursive">Recursive search for groups.</param>
         /// <returns>Collection of groups for which this user is a member.</returns>
-        public ICollection<Principal> GetGroupsForUser(string username, bool recursive = true)
+        public IEnumerable<Principal> GetGroupsForUser(string username, bool recursive = true)
         {
             // Loop to re-attempt.
             for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
@@ -589,7 +589,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                     // If user doesn't exist, return empty list.
                     if (userPrincipal == null)
                     {
-                        return new List<Principal>();
+                        return Enumerable.Empty<Principal>();
                     }
 
                     // Get and process results.
@@ -666,7 +666,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all matching principals.</returns>
-        private ICollection<Principal> GetAllPrincipals(Principal searchPrincipal, int? pageIndex = null, int? pageSize = null, IdentityType? sortOrder = null)
+        private IEnumerable<Principal> GetAllPrincipals(Principal searchPrincipal, int? pageIndex = null, int? pageSize = null, IdentityType? sortOrder = null)
         {
             // Since parents that call this function are wrapped in retry loops, this function should not be.
 
@@ -690,7 +690,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
                                        .Take(pageSize.Value);
             }
 
-            return principals.ToList();
+            return principals;
         }
         #endregion
 

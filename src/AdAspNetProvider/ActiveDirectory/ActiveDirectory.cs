@@ -56,7 +56,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all groups.</returns>
-        public ICollection<Principal> GetAllGroups(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        public IEnumerable<Principal> GetAllGroups(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Get principals for all groups.
             var groupPrincipals = this.adService.GetAllGroups(pageIndex, pageSize, sortOrder);
@@ -74,7 +74,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all groups.</returns>
-        public ICollection<string> GetAllGroupNames(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        public IEnumerable<string> GetAllGroupNames(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Get group principals.
             var groupPrincipals = this.GetAllGroups(pageIndex, pageSize, sortOrder);
@@ -161,7 +161,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all users.</returns>
-        public ICollection<Principal> GetAllUsers(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        public IEnumerable<Principal> GetAllUsers(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Get principals for all users.
             var userPrincipals = this.adService.GetAllUsers(pageIndex, pageSize, sortOrder);
@@ -179,7 +179,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all users.</returns>
-        public ICollection<string> GetAllUserNames(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        public IEnumerable<string> GetAllUserNames(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Process entries.
             var userPrincipals = this.GetAllUsers(pageIndex, pageSize, sortOrder);
@@ -198,7 +198,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all users.</returns>
-        public ICollection<Principal> FindUsersByEmail(string email, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        public IEnumerable<Principal> FindUsersByEmail(string email, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
         {
             // Get principals that match email.
             var userPrincipals = this.adService.FindUsersByEmail(email, pageIndex, pageSize, sortOrder);
@@ -217,7 +217,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by account name.</param>
         /// <returns>Collection of all users.</returns>
-        public ICollection<Principal> FindUsersByName(string username, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = IdentityType.SamAccountName)
+        public IEnumerable<Principal> FindUsersByName(string username, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = IdentityType.SamAccountName)
         {
             // Get principals that match email.
             var userPrincipals = this.adService.FindUsersByName(username, pageIndex, pageSize, sortOrder);
@@ -282,7 +282,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="group">Group to test.</param>
         /// <param name="recursive">Recursively search children.</param>
         /// <returns>Collection of users of group.</returns>
-        public ICollection<Principal> GetUsersForGroup(string group, bool recursive = true)
+        public IEnumerable<Principal> GetUsersForGroup(string group, bool recursive = true)
         {
             // Get principals for users.
             var userPrincipals = this.adService.GetUsersForGroup(this.GetRenamedFromGroup(group), recursive);
@@ -299,7 +299,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="group">Group to test.</param>
         /// <param name="recursive">Recursively search children.</param>
         /// <returns>Collection of users of group.</returns>
-        public ICollection<string> GetUserNamesForGroup(string group, bool recursive = true)
+        public IEnumerable<string> GetUserNamesForGroup(string group, bool recursive = true)
         {
             // Process users for ignore and allowed.
             var userPrincipals = this.GetUsersForGroup(group, recursive);
@@ -316,7 +316,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="username">Username to check.</param>
         /// <param name="recursive">Recursive search for groups.</param>
         /// <returns>Collection of groups for which this user is a member.</returns>
-        public ICollection<Principal> GetGroupsForUser(string username, bool recursive = true)
+        public IEnumerable<Principal> GetGroupsForUser(string username, bool recursive = true)
         {
             // Get principals for groups.
             var groupPrincipals = this.adService.GetGroupsForUser(username, recursive);
@@ -333,7 +333,7 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <param name="username">Username to check.</param>
         /// <param name="recursive">Recursive search for groups.</param>
         /// <returns>Collection of groups for which this user is a member.</returns>
-        public ICollection<string> GetGroupNamesForUser(string username, bool recursive = true)
+        public IEnumerable<string> GetGroupNamesForUser(string username, bool recursive = true)
         {
             // Process groups for rename, ignore, and allowed.
             var groupPrincipals = this.GetGroupsForUser(username, recursive);
@@ -363,12 +363,12 @@ namespace AdAspNetProvider.ActiveDirectory
         /// </summary>
         /// <param name="principals">Collection of principals.</param>
         /// <returns>Collection of names.</returns>
-        public ICollection<string> GetNamesFromPrincipals(ICollection<Principal> principals)
+        public IEnumerable<string> GetNamesFromPrincipals(IEnumerable<Principal> principals)
         {
             // If there are no principals, return empty list.
             if (principals == null)
             {
-                return new List<string>();
+                return Enumerable.Empty<string>();
             }
 
             // Collection of names.
@@ -479,12 +479,12 @@ namespace AdAspNetProvider.ActiveDirectory
         /// </summary>
         /// <param name="originalUsers">Original collection of users.</param>
         /// <returns>Processed collection of users.</returns>
-        private ICollection<Principal> ProcessIgnoredAllowedUsers(ICollection<Principal> originalUsers)
+        private IEnumerable<Principal> ProcessIgnoredAllowedUsers(IEnumerable<Principal> originalUsers)
         {
             // If there are no originalUsers, return empty list.
             if (originalUsers == null)
             {
-                return new List<Principal>();
+                return Enumerable.Empty<Principal>();
             }
 
             // New list of users.
@@ -550,12 +550,12 @@ namespace AdAspNetProvider.ActiveDirectory
         /// </summary>
         /// <param name="originalGroups">Original collection of groups.</param>
         /// <returns>Processed collection of groups.</returns>
-        private ICollection<Principal> ProcessIgnoreAllowedGroups(ICollection<Principal> originalGroups)
+        private IEnumerable<Principal> ProcessIgnoreAllowedGroups(IEnumerable<Principal> originalGroups)
         {
             // If there are no originalGroups, return empty list.
             if (originalGroups == null)
             {
-                return new List<Principal>();
+                return Enumerable.Empty<Principal>();
             }
 
             // New list of users.
