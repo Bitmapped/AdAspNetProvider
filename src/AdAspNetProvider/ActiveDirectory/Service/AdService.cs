@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Dynamic;
 using System.Text;
 using System.Threading.Tasks;
 using System.DirectoryServices;
@@ -665,70 +666,31 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all matching principals.</returns>
-        private ICollection<Principal> GetAllPrincipals(Principal searchPrincipal, int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        private ICollection<Principal> GetAllPrincipals(Principal searchPrincipal, int? pageIndex = null, int? pageSize = null, IdentityType? sortOrder = null)
         {
             // Since parents that call this function are wrapped in retry loops, this function should not be.
 
             // Get principalSearch for this element.
             var principalSearcher = new PrincipalSearcher(searchPrincipal);
 
-            // Configure settings for underlying searcher.
-            var underlyingSearcher = (DirectorySearcher)principalSearcher.GetUnderlyingSearcher();
-            underlyingSearcher.PageSize = 0x200;
-            underlyingSearcher.PropertiesToLoad.Add(this.Config.IdentityType.ToString().ToLower());
+            // Construct query to get principals. Ensure no results are null.
+            // See: http://social.msdn.microsoft.com/Forums/en/csharpgeneral/thread/9dd81553-3539-4281-addd-3eb75e6e4d5d 
+            var principals = principalSearcher.FindAll().Where(x => x != null);
 
+            // If sort order has been specified, take it into account in query.
             if (sortOrder.HasValue)
             {
-                underlyingSearcher.Sort = new SortOption(sortOrder.Value.ToString().ToLower(), SortDirection.Ascending);
-                underlyingSearcher.PropertiesToLoad.Add(sortOrder.Value.ToString().ToLower());
+                principals = principals.OrderBy(sortOrder.Value.ToString());
             }
-            else
+
+            // If page size and index have been specified, take them into account in query.
+            if (pageSize.HasValue && pageIndex.HasValue)
             {
-                underlyingSearcher.Sort = new SortOption(this.Config.IdentityType.ToString().ToLower(), SortDirection.Ascending);
+                principals = principals.Skip(pageSize.Value * pageIndex.Value)
+                                       .Take(pageSize.Value);
             }
 
-            // Get and process results.
-            var principals = new List<Principal>();
-            var principalResults = principalSearcher.FindAll();
-
-            // Calculate begin and end points for results.
-            int startIndex = 0, endIndex = int.MaxValue;
-            if ((pageIndex != null) && (pageSize != null))
-            {
-                startIndex = pageIndex.Value * pageSize.Value;
-                endIndex = (pageIndex.Value + 1) * pageSize.Value;
-            }
-
-            // Use enumerator to loop because of issues with errors on sometimes-returned invalid SIDs.
-            // See: http://social.msdn.microsoft.com/Forums/en/csharpgeneral/thread/9dd81553-3539-4281-addd-3eb75e6e4d5d 
-            var principalEnum = principalResults.GetEnumerator();
-            int currentIndex = 0;
-            while (principalEnum.MoveNext())
-            {
-                if ((startIndex <= currentIndex) && (currentIndex < endIndex))
-                {
-                    Principal newPrincipal = null;
-                    try
-                    {
-                        newPrincipal = principalEnum.Current;
-
-                        if (newPrincipal != null)
-                        {
-                            // Add group object to results.
-                            principals.Add(newPrincipal);
-                        }
-                    }
-                    catch (PrincipalOperationException pe)
-                    {
-                        continue;
-                    }
-                }
-
-                // Increment counter.
-                currentIndex++;
-            }
-
-            return principals;
+            return principals.ToList();
         }
         #endregion
 

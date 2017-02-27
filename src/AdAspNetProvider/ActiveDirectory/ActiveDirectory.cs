@@ -493,31 +493,57 @@ namespace AdAspNetProvider.ActiveDirectory
             // Filter for allowed users.
             if (this.Config.AllowedUsers.Any())
             {
+                // Iterate through Allowed Users
+                foreach (var allowedUser in this.Config.AllowedUsers)
+                {
+                    //attempt to get user (may need to change to use SamAccountName)
+                    Principal principalItem = (Principal)originalUsers.FirstOrDefault(s => s.Name.Equals(allowedUser));
+
+                    //if found = allowed; add to output
+                    if (principalItem != null)
+                        processedUsers.Add(principalItem);
+                }
+
                 // Iterate through list of original users to see if they are allowed.
-                foreach (var originalUser in originalUsers)
+                /*foreach (var originalUser in originalUsers)
                 {
                     if (this.Config.AllowedUsers.Contains(this.GetNameFromPrincipal(originalUser)))
                     {
                         // User on allowed list.  Add to output.
                         processedUsers.Add(originalUser);
                     }
-                }
+                }*/
             }
             else
             {
+                //assume all users are allowed initially
+                processedUsers = originalUsers.ToList<Principal>();
+
+                // Iterate through Excluded Users
+                foreach (var ignoredUser in this.Config.UsersToIgnore)
+                {
+                    //attempt to get user (may need to change to use SamAccountName)
+                    Principal principalItem = (Principal)originalUsers.FirstOrDefault(s => s.Name.Equals(ignoredUser));
+
+                    //if found = exclude; remove from output
+                    if (principalItem != null)
+                        processedUsers.Remove(principalItem);
+                }
+
                 // Iterate through list of original users to see if they are to be ignored.
-                foreach (var originalUser in originalUsers)
+                /*foreach (var originalUser in originalUsers)
                 {
                     if (this.Config.UsersToIgnore.Contains(this.GetNameFromPrincipal(originalUser)) == false)
                     {
                         // User not on ignore list.  Add to output.
                         processedUsers.Add(originalUser);
                     }
-                }
+                }*/
             }
 
             return processedUsers;
         }
+
 
         /// <summary>
         /// Processes collection of groups to ignore and allow.
@@ -588,5 +614,6 @@ namespace AdAspNetProvider.ActiveDirectory
 
             return processedGroups;
         }
+        #endregion 
     }
-    }
+}
