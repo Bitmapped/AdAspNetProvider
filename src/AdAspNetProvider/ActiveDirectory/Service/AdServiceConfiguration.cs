@@ -41,7 +41,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
             if (connectionString != null)
             {
                 // Test to ensure connection string is valid.
-                if (connectionString.Substring(0, 7) != "LDAP://")
+                if ((connectionString.Substring(0, 7).ToUpper() != "LDAP://") && (connectionString.Substring(0, 8).ToUpper() != "LDAPS://"))
                 {
                     throw new ArgumentException(String.Format("Specified \"{0}\" connection string is invalid.", connectionString));
                 }

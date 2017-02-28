@@ -37,7 +37,7 @@ namespace AdAspNetProvider
                 throw new ProviderException(string.Format("Specified \"{0}\" connection string does not exist.", config["connectionStringName"]));
             }
             var connectionString = ConfigurationManager.ConnectionStrings[config["connectionStringName"]].ConnectionString;
-            if (connectionString.Substring(0, 7) != "LDAP://")
+            if ((connectionString.Substring(0, 7).ToUpper() != "LDAP://") && (connectionString.Substring(0, 8).ToUpper() != "LDAPS://"))
             {
                 throw new ProviderException(String.Format("Specified \"{0}\" connection string is invalid.", config["connectionStringName"]));
             }
@@ -143,7 +143,7 @@ namespace AdAspNetProvider
 
             // Store application name.
             this.ApplicationName = config["applicationName"];
-            
+
             // Set cache duration.
             if (!string.IsNullOrWhiteSpace(config["cacheDurationInMinutes"]))
             {
