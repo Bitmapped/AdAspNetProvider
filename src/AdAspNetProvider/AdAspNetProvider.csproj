@@ -62,10 +62,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ActiveDirectory\AdConfiguration.cs" />
-    <Compile Include="ActiveDirectory\ActiveDirectory.cs" />
+    <Compile Include="ActiveDirectory\ToolsConfiguration.cs" />
+    <Compile Include="ActiveDirectory\Tools.cs" />
     <Compile Include="ActiveDirectory\Service\AdService.cs" />
-    <Compile Include="ActiveDirectory\Service\AdConfiguration.cs" />
+    <Compile Include="ActiveDirectory\Service\AdServiceConfiguration.cs" />
     <Compile Include="ActiveDirectory\Service\Dns.cs" />
     <Compile Include="ActiveDirectory\Service\DnsCache.cs" />
     <Compile Include="ActiveDirectory\Service\DnsCacheItem.cs" />

@@ -13,7 +13,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// </summary>
         /// <param name="hostname">Hostname associated with cache entries.</param>
         /// <param name="serverIPs"></param>
-        public DnsCache(string hostname, AdConfiguration config)
+        public DnsCache(string hostname, AdServiceConfiguration config)
         {
             // Store hostname.
             this.Hostname = hostname;
@@ -30,7 +30,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <summary>
         /// Stores configuration settings.
         /// </summary>
-        private AdConfiguration Config { get; set; }
+        private AdServiceConfiguration Config { get; set; }
 
         /// <summary>
         /// Tracks time DNS entries were last refreshed.

@@ -11,7 +11,7 @@ namespace AdAspNetProvider
     public class ActiveDirectoryMembershipProvider : MembershipProvider
     {
         #region Private variables
-        private ActiveDirectory.ActiveDirectory adConnect;
+        private ActiveDirectory.Tools adConnect;
         #endregion
 
         #region Initialization methods
@@ -47,7 +47,7 @@ namespace AdAspNetProvider
             // If needed to check allowedRoles, get AdConnection.
             if (this.Config.AllowedGroups.Any())
             {
-                this.adConnect = new ActiveDirectory.ActiveDirectory(this.Config);
+                this.adConnect = new ActiveDirectory.Tools(this.Config);
             }
 
             // Initialize base class.
@@ -88,7 +88,7 @@ namespace AdAspNetProvider
             }
 
             // Get connection.
-            this.adConnect = new ActiveDirectory.ActiveDirectory(this.Config);
+            this.adConnect = new ActiveDirectory.Tools(this.Config);
 
             return (this.adConnect == null);
         }

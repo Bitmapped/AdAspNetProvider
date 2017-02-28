@@ -10,7 +10,7 @@ using System.ComponentModel;
 
 namespace AdAspNetProvider
 {
-    public class ProviderConfiguration : AdConfiguration
+    public class ProviderConfiguration : ToolsConfiguration
     {
         #region Constructor
         /// <summary>

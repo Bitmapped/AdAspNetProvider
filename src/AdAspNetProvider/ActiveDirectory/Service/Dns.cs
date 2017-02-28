@@ -11,7 +11,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <summary>
         /// Constructor.
         /// </summary>
-        public Dns(AdConfiguration config)
+        public Dns(AdServiceConfiguration config)
         {
             // Initialize DnsCache.
             this.DnsCache = new ConcurrentDictionary<string, DnsCache>();
@@ -30,7 +30,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <summary>
         /// Stores configuration settings.
         /// </summary>
-        private AdConfiguration Config { get; set; }
+        private AdServiceConfiguration Config { get; set; }
         #endregion
 
         /// <summary>

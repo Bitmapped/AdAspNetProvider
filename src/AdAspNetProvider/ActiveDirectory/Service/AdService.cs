@@ -16,7 +16,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <summary>
         /// Active Directory configuration settings
         /// </summary>
-        public AdConfiguration Config { get; set; }
+        public AdServiceConfiguration Config { get; set; }
 
         /// <summary>
         /// Dns lookup and caching functionality
@@ -31,14 +31,14 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <param name="username">Username to use for connection.</param>
         /// <param name="password">Password to use for connection.</param>
         public AdService(string server, string username, string password)
-            : this(new AdConfiguration { Server = server, Username = username, Password = password })
+            : this(new AdServiceConfiguration { Server = server, Username = username, Password = password })
         { }
 
         /// <summary>
         /// Create new Active Directory connection.
         /// </summary>
         /// <param name="configuration">Configuration settings to use.</param>
-        public AdService(AdConfiguration configuration)
+        public AdService(AdServiceConfiguration configuration)
         {
             // Verify a valid configuration object was passed.
             if (configuration == null)
