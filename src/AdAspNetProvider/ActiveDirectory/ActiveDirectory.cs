@@ -533,7 +533,7 @@ namespace AdAspNetProvider.ActiveDirectory
             else
             {
                 //assume all groups are allowed initially
-                processedGroups = originalGroups.ToList<Principal>();
+                processedGroups = originalGroups.ToList();
 
                 // Iterate through Excluded Groups
                 foreach (var ignoredGroup in this.Config.GroupsToIgnore)

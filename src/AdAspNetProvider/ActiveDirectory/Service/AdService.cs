@@ -317,7 +317,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all users.</returns>
-        public IEnumerable<Principal> GetAllUsers(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        public IEnumerable<Principal> GetAllUsers(int? pageIndex = null, int? pageSize = null, IdentityType? sortOrder = null)
         {
             // Loop to re-attempt.
             for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
@@ -424,7 +424,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// <param name="pageSize">Number of items per page to return, or null for all results.</param>
         /// <param name="sortOrder">Sort order for results, or null to sort by configuration IdentityType.</param>
         /// <returns>Collection of all groups.</returns>
-        public IEnumerable<Principal> GetAllGroups(int? pageIndex = null, int? pageSize = null, Nullable<IdentityType> sortOrder = null)
+        public IEnumerable<Principal> GetAllGroups(int? pageIndex = null, int? pageSize = null, IdentityType? sortOrder = null)
         {
             // Loop to re-attempt.
             for (int attempt = 0; attempt < this.Config.MaxAttempts; attempt++)
