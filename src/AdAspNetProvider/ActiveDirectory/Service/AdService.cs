@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Dynamic;
-using System.Text;
-using System.Threading.Tasks;
-using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 using System.DirectoryServices.ActiveDirectory;
 using System.Net;
@@ -680,7 +676,35 @@ namespace AdAspNetProvider.ActiveDirectory.Service
             // If sort order has been specified, take it into account in query.
             if (sortOrder.HasValue)
             {
-                principals = principals.OrderBy(sortOrder.Value.ToString());
+                switch (sortOrder.Value)
+                {
+                    case IdentityType.DistinguishedName:
+                        principals = principals.OrderBy(x => x.DistinguishedName);
+                        break;
+
+                    case IdentityType.Guid:
+                        principals = principals.OrderBy(x => x.Guid);
+                        break;
+
+                    case IdentityType.Name:
+                        principals = principals.OrderBy(x => x.Name);
+                        break;
+
+                    case IdentityType.SamAccountName:
+                        principals = principals.OrderBy(x => x.SamAccountName);
+                        break;
+
+                    case IdentityType.Sid:
+                        principals = principals.OrderBy(x => x.Sid);
+                        break;
+
+                    case IdentityType.UserPrincipalName:
+                        principals = principals.OrderBy(x => x.UserPrincipalName);
+                        break;
+
+                    default:
+                        break;
+                }
             }
 
             // If page size and index have been specified, take them into account in query.
