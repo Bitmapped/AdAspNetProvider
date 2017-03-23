@@ -111,7 +111,32 @@ namespace AdAspNetProvider
                 throw new NotSupportedException("Search methods are not enabled.");
             }
 
-            return this.adConnect.GetAllGroupNames().ToArray();
+            // Define private variables.
+            string[] roles = null;
+
+            // Check cache.
+            string cacheKey = "__ACTIVEDIRECTORYROLEPROVIDER__" + this.Config.Name;
+            HttpContext currentContext = HttpContext.Current;
+            if (currentContext != null)
+            {
+                ActiveDirectoryRoleProviderCache cache = (ActiveDirectoryRoleProviderCache)currentContext.Cache.Get(cacheKey);
+                if (cache != null)
+                {
+                    // Value found in cache.  Return it.
+                    return cache.Roles;
+                }
+            }
+
+            // Value not found in cache.  Get all roles 
+            roles = this.adConnect.GetAllGroupNames().ToArray();
+
+            // Store value in cache.
+            if (currentContext != null)
+            {
+                currentContext.Cache.Insert(cacheKey, new ActiveDirectoryRoleProviderCache(roles), null, DateTime.Now.AddMinutes(this.Config.CacheDurationInMinutes), Cache.NoSlidingExpiration);
+            }
+
+            return roles;
         }
 
         /// <summary>
