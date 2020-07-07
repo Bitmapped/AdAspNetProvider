@@ -56,6 +56,8 @@ To use `AdAspNetProvider.ActiveDirectoryMembershipProvider` with Umbraco 7.3.1+,
     - `maxServerFailures` - maximum number of times AD server can fail before removed from current cached list of controllers
     - `enableSearchMethods` - true/false if methods for searching for users and groups should be enabled
     - `ignoreServerIpAddresses` - comma-separated list of server IP addresses that should be ignored if returned by a DNS lookup
+	- `allowedServerIpAddresses` - comma-separated list of server IP addresses to be used, regardless of IP addresses returned by DNS lookup on connection string
+	- `allowedServerDnsNames` - comma-separated list of server DNS names to be used, regardless of IP addresses returned by DNS lookup on connection string
     - `silentlyIgnoreNotSupported` - true/false if not-supported methods should return generic values rather than throwing NotSupportedException
 
 - Supported options for role providers only:

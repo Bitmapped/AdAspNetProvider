@@ -222,6 +222,24 @@ namespace AdAspNetProvider
                 this.IgnoreServerIpAddresses.AddRange(config["ignoreServerIpAddresses"].Split(',').Select(ip => IPAddress.Parse(ip.Trim())));
             }
 
+            // Process allowed server IPs.
+            if (!String.IsNullOrWhiteSpace(config["allowedServerIpAddresses"]))
+            {
+                this.AllowedServerIpAddresses.AddRange(config["allowedServerIpAddresses"].Split(',').Select(ip => IPAddress.Parse(ip.Trim())));
+            }
+
+            // Process allowed server DNS names.
+            if (!String.IsNullOrWhiteSpace(config["allowedServerDnsNames"]))
+            {
+                this.AllowedServerDnsNames.AddRange(config["allowedServerDnsNames"].Split(','));
+
+                // Look up IP addresses for DNS names.
+                foreach (var dnsName in this.AllowedServerDnsNames)
+                {
+                    this.AllowedServerIpAddresses.AddRange(Dns.GetHostAddresses(dnsName).Except(this.IgnoreServerIpAddresses));
+                }
+            }
+
             // Process silently ignoring not supported methods and properties.
             if (!string.IsNullOrWhiteSpace(config["silentlyIgnoreNotSupported"]) && (config["silentlyIgnoreNotSupported"].ToLower() == "true"))
             {

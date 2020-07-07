@@ -37,6 +37,12 @@ namespace AdAspNetProvider.ActiveDirectory.Service
             // Default to empty list.
             this.IgnoreServerIpAddresses = new List<IPAddress>();
 
+            // Default to empty list.
+            this.AllowedServerIpAddresses = new List<IPAddress>();
+
+            // Default to empty list.
+            this.AllowedServerDnsNames = new List<string>();
+
             // Set connection string if specified.
             if (connectionString != null)
             {
@@ -126,6 +132,16 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         /// Server IPs to ignore if returned by DNS
         /// </summary>
         public List<IPAddress> IgnoreServerIpAddresses { get; set; }
+
+        /// <summary>
+        /// Server IPs to use regardless of what is returned by DNS
+        /// </summary>
+        public List<IPAddress> AllowedServerIpAddresses { get; set; }
+
+        /// <summary>
+        /// Server DNS names to use regardless of what is returned by DNS. Combined with any IP addresses.
+        /// </summary>
+        public List<string> AllowedServerDnsNames { get; set; }
 
         #endregion
 

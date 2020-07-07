@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 
@@ -101,13 +102,23 @@ namespace AdAspNetProvider.ActiveDirectory.Service
             }
 
             // Store time of last refresh.
-            this.CacheLastRefresh = DateTime.Now;            
+            this.CacheLastRefresh = DateTime.Now;
 
-            // Perform Dns lookup.
-            var serverIPs = System.Net.Dns.GetHostAddresses(this.Hostname);
+            // If allowed server IPs not specified, fetch and filter from DNS.
+            IEnumerable<IPAddress> serverIPs;
+            if (!this.Config.AllowedServerIpAddresses.Any())
+            {
+                // Get IPs from DNS
+                serverIPs = System.Net.Dns.GetHostAddresses(this.Hostname).ToList();
 
-            // Filter out ignored server IP addresses.
-            serverIPs = serverIPs.Except(this.Config.IgnoreServerIpAddresses).ToArray();
+                // Filter out ignored server IP addresses.
+                serverIPs = serverIPs.Except(this.Config.IgnoreServerIpAddresses);
+            }
+            else
+            {
+                // Use list of allowed IPs
+                serverIPs = this.Config.AllowedServerIpAddresses;
+            }
 
             // Store each server IP.
             foreach (var serverIP in serverIPs)

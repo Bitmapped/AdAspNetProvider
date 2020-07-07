@@ -62,7 +62,7 @@ namespace AdAspNetProvider.ActiveDirectory.Service
             var serverIPs = this.GetIpAddresses(host);
 
             // Determine which server to try.  If attempt number is specified, work through returned IPs in order.  Otherwise, select random.
-            IPAddress serverIP = null;
+            IPAddress serverIP;
             if (attempt == null)
             {
                 // Get random number.
