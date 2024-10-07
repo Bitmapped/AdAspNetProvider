@@ -95,7 +95,7 @@ namespace AdAspNetProvider.ActiveDirectory
         }
         #endregion
 
-        #region Methods for users.
+        #region Methods for users
         /// <summary>
         /// Find all users whose e-mail address matches the given string.
         /// </summary>
@@ -282,13 +282,43 @@ namespace AdAspNetProvider.ActiveDirectory
         /// <returns>Collection of groups for which this user is a member.</returns>
         public IEnumerable<string> GetGroupNamesForUser(string username, bool recursive = true)
         {
-            // Process groups for rename, ignore, and allowed.
-            var groupPrincipals = this.GetGroupsForUser(username, recursive);
+            // Get group names this user is a member of
+            var groups = this.adService.GetGroupNamesMemberOfForUser(username, recursive);
 
-            // Process entries.
-            var groups = this.GetNamesFromPrincipals(groupPrincipals);
+            // Rename groups
+            groups = this.GetRenamedGroups(groups);
 
             return groups;
+        }
+
+        /// <summary>
+        /// Get list of group names that have been processed for renaming
+        /// </summary>
+        /// <param name="renameFromGroups">Original names of groups from Active Directory</param>
+        /// <returns>Renamed groups as configured for this provider</returns>
+        public IEnumerable<string> GetRenamedGroups(IEnumerable<string> renameFromGroups)
+        {
+            // Return empty list if no groups were passed
+            if (renameFromGroups == null)
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            // Iterate through list of original groups to find renamed equivalent, adding that to list
+            List<string> renamedGroups = new List<string>();
+            foreach (string renameFromGroup in renameFromGroups)
+            {
+                // Attempt to get renamed group for this item
+                string renamedGroup = this.GetRenamedGroup(renameFromGroup);
+
+                // If renamed group exists, add it to list
+                if (renamedGroup != null)
+                {
+                    renamedGroups.Add(renamedGroup);
+                }
+            }
+
+            return (IEnumerable<string>)renamedGroups;
         }
 
         /// <summary>

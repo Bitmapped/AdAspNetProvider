@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.DirectoryServices;
 using System.DirectoryServices.AccountManagement;
 using System.DirectoryServices.ActiveDirectory;
 using System.Net;
+using System.Security.Principal;
 
 namespace AdAspNetProvider.ActiveDirectory.Service
 {
@@ -52,11 +54,11 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
         #region Methods for users.
         /// <summary>
-        /// Validate that user is authorized.
+        /// Validate that user is authorized
         /// </summary>
-        /// <param name="username">Username to check.</param>
-        /// <param name="password">Password to check.</param>
-        /// <returns>True/false if user can be validated.</returns>
+        /// <param name="username">Username to check</param>
+        /// <param name="password">Password to check</param>
+        /// <returns>True/false if user can be validated</returns>
         public bool ValidateUser(string username, string password)
         {
             // Loop to re-attempt.
@@ -97,10 +99,10 @@ namespace AdAspNetProvider.ActiveDirectory.Service
         }
 
         /// <summary>
-        /// Load the listed user.
+        /// Get a UserPrincipal object representing the requested user
         /// </summary>
-        /// <param name="username">Username to load.</param>
-        /// <returns>Object representing user or null if doesn't exist.</returns>
+        /// <param name="username">Username to load</param>
+        /// <returns>Object representing user or null if doesn't exist</returns>
         public UserPrincipal GetUser(string username)
         {
             // Loop to re-attempt.
@@ -561,6 +563,136 @@ namespace AdAspNetProvider.ActiveDirectory.Service
 
             // Return based on if userPrincipal is in groupMembers.
             return userGroups.Contains(groupPrincipal);
+        }
+
+        /// <summary>
+        /// Get names of groups the specified user is a member of
+        /// </summary>
+        /// <param name="username">Username to check</param>
+        /// <param name="recursive">Recursively check nested groups</param>
+        /// <returns>List of group names the user is a member of</returns>
+        public IEnumerable<string> GetGroupNamesMemberOfForUser(string username, bool recursive = true)
+        {
+            // Get UserPrincipal object for the user
+            UserPrincipal user = this.GetUser(username);
+
+            // Return empty list if user doesn't exist
+            if (user == null)
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            // Get primary group for user
+            string userPrimaryGroup = AdService.GetUserPrimaryGroup((DirectoryEntry)user.GetUnderlyingObject());
+
+            // Get names of groups the user principal object is a member of
+            List<string> groups = this.GetGroupNamesMemberOfForPrincipal((Principal)user).ToList<string>();
+
+            // Add primary user group to list of groups
+            groups.Add(userPrimaryGroup);
+
+            // If recursive, get all groups the user is a member of
+            if (recursive)
+            {
+                // Create list of groups to check
+                List<string> list2 = groups.ToList<string>();
+
+                // Clear groups list as it will be rebuilt
+                groups.Clear();
+
+                // While there are still groups to check, process them
+                while (list2.Any<string>())
+                {
+                    // Group first group from list
+                    string groupname = list2[0];
+
+                    // Get all groups the group is a member of
+                    IEnumerable<string> memberOfForGroup = this.GetGroupNamesMemberOfForGroup(groupname, false);
+                    groups.Add(groupname);
+                    list2.RemoveAt(0);
+                    list2.AddRange(memberOfForGroup.Except<string>((IEnumerable<string>)groups));
+                }
+            }
+            return (IEnumerable<string>)groups;
+        }
+
+        /// <summary>
+        /// Get primary group for user
+        /// </summary>
+        /// <param name="de">Directory entry for user</param>
+        /// <returns>name of user's primary group</returns>
+        private static string GetUserPrimaryGroup(DirectoryEntry de)
+        {
+            // Refresh information for directory entry
+            de.RefreshCache(new string[2] { "primaryGroupID", "objectSid" });
+
+            // Get SID for user
+            string str = new SecurityIdentifier((byte[])de.Properties["objectSid"].Value, 0).ToString();
+
+            // Get directory entry for primary group
+            DirectoryEntry directoryEntry = new DirectoryEntry("LDAP://<SID=" + (str.Remove(str.LastIndexOf("-", StringComparison.Ordinal) + 1) + de.Properties["primaryGroupId"].Value?.ToString()) + ">");
+
+            // Load primary group name
+            directoryEntry.RefreshCache(new string[1] { "cn" });
+
+            // Return primary group name
+            return directoryEntry.Properties["cn"].Value as string;
+        }
+
+        /// <summary>
+        /// Gets names of groups the specified group is a member of
+        /// </summary>
+        /// <param name="groupname">Name of group to retrieve information for</param>
+        /// <param name="recursive">Search recursively</param>
+        /// <returns>Names of group this group is a member of</returns>
+        public IEnumerable<string> GetGroupNamesMemberOfForGroup(string groupname, bool recursive = true)
+        {
+            return this.GetGroupNamesMemberOfForPrincipal((Principal)this.GetGroup(groupname));
+        }
+
+        public IEnumerable<string> GetGroupNamesMemberOfForPrincipal(System.DirectoryServices.AccountManagement.Principal principal)
+        {
+            // Return empty enumerable if principal doesn't exist
+            if (principal == null)
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            // Create list to store groups principal is a member of
+            List<string> memberOfForPrincipal = new List<string>();
+
+            // Get underlying LDAP object for principal
+            using (DirectoryEntry underlyingObject = (DirectoryEntry)principal.GetUnderlyingObject())
+            {
+                // Try to get array of groups the principal is a menebr of
+                object[] groupNames = (object[])null;
+                if (underlyingObject.Properties.Contains("memberOf"))
+                {
+                    groupNames = underlyingObject.Properties["memberOf"].Value as object[];
+                }
+
+                // If the array is not null, process its group names
+                if (groupNames != null)
+                {
+                    // Process each group in the array
+                    foreach (string groupName in groupNames)
+                    {
+                        // If the group name starts with "CN=", add it to the list
+                        if (groupName.StartsWith("CN=", StringComparison.OrdinalIgnoreCase))
+                        {
+                            // Cut of the "CN=" part of the group name
+                            int groupNameEnd = groupName.IndexOf(",", 3);
+                            string trimmedGroupName = groupNameEnd < 0 ? groupName.Substring(3) : groupName.Substring(3, groupNameEnd - 3);
+                            if (trimmedGroupName.Length > 0)
+                            {
+                                memberOfForPrincipal.Add(trimmedGroupName);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return memberOfForPrincipal;
         }
 
         /// <summary>
